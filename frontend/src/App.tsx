@@ -1372,7 +1372,12 @@ function SideBox({
         <div className="absolute inset-0 stripes opacity-[0.06] pointer-events-none" />
       )}
       {active && (
-        <div className="absolute -top-1 -right-1">
+        <div
+          className={cn(
+            "absolute top-2 z-10",
+            align === "left" ? "right-12 sm:right-14" : "right-2"
+          )}
+        >
           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-canvas text-lime font-mono text-[9px] tracking-[0.2em] uppercase">
             <Crown className="w-2.5 h-2.5" /> WIN
           </span>
