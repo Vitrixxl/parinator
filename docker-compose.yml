@@ -1,0 +1,19 @@
+services:
+  parinator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: parinator:local
+    ports:
+      - "8080:8080"
+    environment:
+      API_ADDR: 0.0.0.0:8080
+      STATIC_DIR: /app/public
+      DATABASE_URL: sqlite:///data/parinator.db
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+    volumes:
+      - parinator-data:/data
+    restart: unless-stopped
+
+volumes:
+  parinator-data:

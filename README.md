@@ -2,6 +2,20 @@
 
 Application de paris amicaux sans argent réel.
 
+## Docker
+
+```bash
+docker compose up --build
+```
+
+L'application complète écoute sur `http://127.0.0.1:8080`. La base SQLite est persistée dans le volume Docker `parinator-data`.
+
+En production, fournis un secret explicite:
+
+```bash
+JWT_SECRET="un-secret-long-et-aleatoire" docker compose up --build -d
+```
+
 ## Build du front dans l'API
 
 ```bash
