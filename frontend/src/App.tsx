@@ -636,9 +636,7 @@ function AuthScreen({
           <p className="eyebrow mb-4">Manifeste</p>
           <h2 className="font-display uppercase tracking-tight leading-[0.92] text-[clamp(2.6rem,7vw,5.5rem)]">
             Les paris<br />
-            <span className="text-lime">entre potes</span><br />
-            sans crypto<br />
-            ni casino.
+            <span className="text-lime">entre potes</span>
           </h2>
           <p className="mt-6 text-ink-dim text-lg max-w-md leading-relaxed">
             Lance un défi, fixe les cotes, partage le ticket. Les dettes se règlent
