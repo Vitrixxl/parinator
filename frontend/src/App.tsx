@@ -1,0 +1,2029 @@
+import {
+  ArrowDownRight,
+  ArrowUpRight,
+  Bell,
+  Check,
+  CircleDollarSign,
+  Coins,
+  Crown,
+  Flame,
+  HandCoins,
+  LogOut,
+  Plus,
+  Send,
+  Share2,
+  Sparkles,
+  Swords,
+  Ticket as TicketIcon,
+  Trophy,
+  UserPlus,
+  Users,
+  X
+} from "lucide-react";
+import { FormEvent, ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ApiFailure, apiRequest, websocketUrl } from "./api";
+import { Button } from "@/components/ui/button";
+import { Card, CardDark } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Segmented } from "@/components/ui/segmented";
+import { cn } from "@/lib/utils";
+
+const TOKEN_KEY = "parinator_token";
+
+type View = "bets" | "create" | "friends" | "debts";
+type Side = "A" | "B";
+
+type User = {
+  id: string;
+  username: string;
+  email: string;
+  createdAt: string;
+};
+
+type AuthResponse = {
+  token: string;
+  user: User;
+};
+
+type FriendRequest = {
+  id: string;
+  user: User;
+  status: string;
+  createdAt: string;
+};
+
+type FriendsResponse = {
+  friends: User[];
+  incoming: FriendRequest[];
+  outgoing: FriendRequest[];
+};
+
+type BetParticipant = {
+  id: string;
+  userId: string;
+  username: string;
+  side: Side | null;
+  amount: number;
+  status: "invited" | "accepted" | "declined";
+  createdAt: string;
+};
+
+type Bet = {
+  id: string;
+  title: string;
+  description: string | null;
+  initiatorId: string;
+  initiatorUsername: string;
+  sideA: string;
+  sideB: string;
+  oddsA: number;
+  oddsB: number;
+  stake: number;
+  winningSide: Side | null;
+  status: "open" | "resolved";
+  shareCode: string;
+  createdAt: string;
+  resolvedAt: string | null;
+  participants: BetParticipant[];
+};
+
+type BetsResponse = {
+  mine: Bet[];
+  friends: Bet[];
+};
+
+type Debt = {
+  id: string;
+  betId: string;
+  betTitle: string;
+  debtorId: string;
+  debtorUsername: string;
+  creditorId: string;
+  creditorUsername: string;
+  amount: number;
+  status: "open" | "settled";
+  createdAt: string;
+  settledAt: string | null;
+};
+
+type DebtsResponse = {
+  iOwe: Debt[];
+  owedToMe: Debt[];
+};
+
+type RealtimeEvent = {
+  kind: string;
+  message: string;
+  betId: string | null;
+  friendshipId: string | null;
+  debtId: string | null;
+  createdAt: string;
+};
+
+type Toast = {
+  id: number;
+  message: string;
+};
+
+const emptyFriends: FriendsResponse = { friends: [], incoming: [], outgoing: [] };
+const emptyBets: BetsResponse = { mine: [], friends: [] };
+const emptyDebts: DebtsResponse = { iOwe: [], owedToMe: [] };
+
+const initials = (name: string) =>
+  name
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "??";
+
+const ticketNumber = (code: string) => code.slice(0, 6).toUpperCase();
+
+const sideLabel = (bet: Pick<Bet, "sideA" | "sideB">, side: Side) =>
+  side === "A" ? bet.sideA : bet.sideB;
+
+const oddsFor = (bet: Pick<Bet, "oddsA" | "oddsB">, side: Side) =>
+  side === "A" ? bet.oddsA : bet.oddsB;
+
+/* ─────────────────────────────────────────────
+   <App> — racine
+   ───────────────────────────────────────────── */
+
+export default function App() {
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
+  const [user, setUser] = useState<User | null>(null);
+  const [view, setView] = useState<View>("bets");
+  const [friends, setFriends] = useState<FriendsResponse>(emptyFriends);
+  const [bets, setBets] = useState<BetsResponse>(emptyBets);
+  const [debts, setDebts] = useState<DebtsResponse>(emptyDebts);
+  const [sharedBet, setSharedBet] = useState<Bet | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const shareCode = useMemo(() => {
+    const match = window.location.pathname.match(/^\/join\/([^/]+)/);
+    return match?.[1] ?? null;
+  }, []);
+
+  const pushToast = useCallback((message: string) => {
+    const id = Date.now() + Math.random();
+    setToasts((current) => [...current.slice(-2), { id, message }]);
+    window.setTimeout(() => {
+      setToasts((current) => current.filter((toast) => toast.id !== id));
+    }, 4500);
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem(TOKEN_KEY);
+    setToken(null);
+    setUser(null);
+    setFriends(emptyFriends);
+    setBets(emptyBets);
+    setDebts(emptyDebts);
+  }, []);
+
+  const handleError = useCallback(
+    (error: unknown) => {
+      if (error instanceof ApiFailure && error.status === 401) {
+        logout();
+        pushToast("Session expirée.");
+        return;
+      }
+      pushToast(error instanceof Error ? error.message : "Action impossible.");
+    },
+    [logout, pushToast]
+  );
+
+  const refreshAll = useCallback(async () => {
+    if (!token) return;
+    const [friendsData, betsData, debtsData] = await Promise.all([
+      apiRequest<FriendsResponse>("/api/friends", token),
+      apiRequest<BetsResponse>("/api/bets", token),
+      apiRequest<DebtsResponse>("/api/debts", token)
+    ]);
+    setFriends(friendsData);
+    setBets(betsData);
+    setDebts(debtsData);
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setLoading(true);
+    apiRequest<User>("/api/me", token)
+      .then((currentUser) => {
+        if (!cancelled) setUser(currentUser);
+      })
+      .catch(handleError)
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [handleError, token]);
+
+  useEffect(() => {
+    if (!token || !user) return;
+    refreshAll().catch(handleError);
+  }, [handleError, refreshAll, token, user]);
+
+  useEffect(() => {
+    if (!shareCode) return;
+    apiRequest<Bet>(`/api/bets/share/${shareCode}`)
+      .then(setSharedBet)
+      .catch(() => pushToast("Lien de pari introuvable."));
+  }, [pushToast, shareCode]);
+
+  useEffect(() => {
+    if (!token || !user) return;
+    const socket = new WebSocket(websocketUrl(token));
+    socket.onmessage = (message) => {
+      const event = JSON.parse(message.data) as RealtimeEvent;
+      if (event.kind !== "connected") {
+        pushToast(event.message);
+        refreshAll().catch(handleError);
+        if (shareCode) {
+          apiRequest<Bet>(`/api/bets/share/${shareCode}`)
+            .then(setSharedBet)
+            .catch(() => null);
+        }
+      }
+    };
+    socket.onerror = () => pushToast("Temps réel indisponible.");
+    return () => socket.close();
+  }, [handleError, pushToast, refreshAll, shareCode, token, user]);
+
+  const onAuthenticated = (response: AuthResponse) => {
+    localStorage.setItem(TOKEN_KEY, response.token);
+    setToken(response.token);
+    setUser(response.user);
+    pushToast(`Connecté en tant que ${response.user.username}.`);
+  };
+
+  return (
+    <>
+      <div className="world-bg" aria-hidden />
+      <div className="world-wordmark" aria-hidden>PARINATOR</div>
+      <div className="world-grain" aria-hidden />
+
+      {loading ? (
+        <LoadingScreen />
+      ) : !token || !user ? (
+        <AuthScreen onAuthenticated={onAuthenticated} sharedBet={sharedBet} />
+      ) : (
+        <div className="min-h-screen pb-[120px] sm:pb-10">
+          <TopBar user={user} onLogout={logout} />
+
+          <main className="mx-auto max-w-[1080px] px-4 sm:px-8 py-6 sm:py-10">
+            {view === "bets" && (
+              <BetsView
+                bets={bets}
+                friends={friends.friends}
+                user={user}
+                token={token}
+                sharedBet={sharedBet}
+                onRefresh={refreshAll}
+                onError={handleError}
+                onToast={pushToast}
+                reloadShared={() => {
+                  if (shareCode) {
+                    apiRequest<Bet>(`/api/bets/share/${shareCode}`)
+                      .then(setSharedBet)
+                      .catch(handleError);
+                  }
+                }}
+              />
+            )}
+            {view === "create" && (
+              <CreateBetView
+                friends={friends.friends}
+                token={token}
+                onCreated={(bet) => {
+                  setBets((current) => ({ ...current, mine: [bet, ...current.mine] }));
+                  setView("bets");
+                  pushToast("Pari créé.");
+                  refreshAll().catch(handleError);
+                }}
+                onError={handleError}
+              />
+            )}
+            {view === "friends" && (
+              <FriendsView
+                friends={friends}
+                token={token}
+                onRefresh={refreshAll}
+                onError={handleError}
+                onToast={pushToast}
+              />
+            )}
+            {view === "debts" && (
+              <DebtsView
+                debts={debts}
+                token={token}
+                onRefresh={refreshAll}
+                onError={handleError}
+              />
+            )}
+          </main>
+
+          <TabBar view={view} setView={setView} bets={bets} debts={debts} />
+
+          <ToastStack toasts={toasts} />
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Loading
+   ───────────────────────────────────────────── */
+
+function LoadingScreen() {
+  return (
+    <main className="min-h-screen grid place-items-center px-6">
+      <div className="text-center space-y-5 pop">
+        <div className="vs-badge mx-auto" style={{ transform: "rotate(-8deg)" }}>VS</div>
+        <div>
+          <p className="eyebrow mb-1">Chargement</p>
+          <h1 className="font-display text-4xl tracking-tight uppercase">Parinator</h1>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   TopBar
+   ───────────────────────────────────────────── */
+
+function TopBar({ user, onLogout }: { user: User; onLogout: () => void }) {
+  return (
+    <header className="sticky top-0 z-30 backdrop-blur-xl bg-canvas/70 border-b border-edge/70">
+      <div className="mx-auto max-w-[1080px] px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="relative w-9 h-9 rounded-md bg-lime grid place-items-center shrink-0 shadow-[0_2px_0_var(--color-lime-deep)]">
+            <Swords className="w-4 h-4 text-canvas" strokeWidth={2.5} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-2">
+              <h1 className="font-display text-2xl tracking-tight uppercase leading-none">
+                Parinator
+              </h1>
+              <span className="hidden sm:inline-block font-mono text-[10px] tracking-[0.2em] text-ink-dim uppercase">
+                // paris entre potes
+              </span>
+            </div>
+            <p className="font-mono text-[10px] tracking-[0.18em] text-ink-dim uppercase truncate">
+              <span className="text-lime">●</span> en ligne · {user.username}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-3 pr-3 border-r border-edge/60">
+            <div className="w-9 h-9 rounded-full bg-lime/15 border border-lime/30 grid place-items-center font-display text-sm text-lime">
+              {initials(user.username)}
+            </div>
+            <div className="text-right">
+              <p className="font-mono text-[10px] tracking-[0.18em] text-ink-dim uppercase">membre</p>
+              <p className="font-display text-sm uppercase tracking-wide">{user.username}</p>
+            </div>
+          </div>
+          <Button variant="icon" size="iconSm" onClick={onLogout} aria-label="Déconnexion" title="Déconnexion">
+            <LogOut className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   TabBar
+   ───────────────────────────────────────────── */
+
+function TabBar({
+  view,
+  setView,
+  bets,
+  debts
+}: {
+  view: View;
+  setView: (v: View) => void;
+  bets: BetsResponse;
+  debts: DebtsResponse;
+}) {
+  const counts: Record<View, number | undefined> = {
+    bets: bets.mine.length + bets.friends.length || undefined,
+    create: undefined,
+    friends: undefined,
+    debts: debts.iOwe.length + debts.owedToMe.length || undefined
+  };
+
+  const tabs: { id: View; icon: ReactNode; label: string }[] = [
+    { id: "bets", icon: <TicketIcon className="w-4 h-4" />, label: "Paris" },
+    { id: "create", icon: <Plus className="w-4 h-4" />, label: "Créer" },
+    { id: "friends", icon: <Users className="w-4 h-4" />, label: "Amis" },
+    { id: "debts", icon: <Coins className="w-4 h-4" />, label: "Dettes" }
+  ];
+
+  return (
+    <nav
+      aria-label="Navigation principale"
+      className="fixed sm:bottom-6 bottom-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.2rem)] sm:w-auto safe-bottom"
+    >
+      <div className="tabbar-glow flex items-center gap-1 p-1.5 rounded-2xl border border-edge-strong shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
+        {tabs.map((tab) => {
+          const active = view === tab.id;
+          const count = counts[tab.id];
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setView(tab.id)}
+              style={active ? { color: "#000000", backgroundColor: "#d5f25c" } : undefined}
+              className={cn(
+                "relative flex-1 sm:flex-none sm:min-w-[100px] h-12 px-3 sm:px-5 rounded-xl flex items-center justify-center gap-2 font-display uppercase tracking-[0.06em] text-xs transition-all",
+                active
+                  ? "font-bold shadow-[0_2px_0_var(--color-lime-deep)]"
+                  : "text-ink-dim hover:text-ink hover:bg-surface-strong"
+              )}
+            >
+              {tab.icon}
+              <span>{tab.label}</span>
+              {typeof count === "number" && (
+                <span
+                  style={
+                    active
+                      ? { color: "#000000", backgroundColor: "rgba(0,0,0,0.18)" }
+                      : undefined
+                  }
+                  className={cn(
+                    "font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-md",
+                    !active && "bg-surface text-ink-dim"
+                  )}
+                >
+                  {count}
+                </span>
+              )}
+              {active && (
+                <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-lime shadow-[0_0_8px_var(--color-lime)]" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Toasts
+   ───────────────────────────────────────────── */
+
+function ToastStack({ toasts }: { toasts: Toast[] }) {
+  return (
+    <div
+      className="fixed bottom-24 sm:bottom-28 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.5rem)] max-w-md grid gap-2"
+      aria-live="polite"
+    >
+      {toasts.map((toast) => (
+        <div
+          key={toast.id}
+          className="ticket ticket-dark p-3 pl-4 flex items-center gap-3 pop"
+        >
+          <span className="w-8 h-8 rounded-full bg-lime/15 border border-lime/40 grid place-items-center shrink-0">
+            <Bell className="w-3.5 h-3.5 text-lime" />
+          </span>
+          <p className="text-sm leading-snug">{toast.message}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   AuthScreen
+   ───────────────────────────────────────────── */
+
+function AuthScreen({
+  onAuthenticated,
+  sharedBet
+}: {
+  onAuthenticated: (response: AuthResponse) => void;
+  sharedBet: Bet | null;
+}) {
+  const [mode, setMode] = useState<"login" | "register">("register");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      const response =
+        mode === "register"
+          ? await apiRequest<AuthResponse>("/api/auth/register", null, {
+              method: "POST",
+              body: { username, email, password }
+            })
+          : await apiRequest<AuthResponse>("/api/auth/login", null, {
+              method: "POST",
+              body: { identifier, password }
+            });
+      onAuthenticated(response);
+    } catch (failure) {
+      setError(failure instanceof Error ? failure.message : "Connexion impossible.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const formFields = (
+    <form onSubmit={submit} className="space-y-3">
+      {mode === "register" ? (
+        <>
+          <div>
+            <Label htmlFor="username" tone="dark">Pseudo</Label>
+            <Input
+              id="username"
+              tone="dark"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+              placeholder="marcel"
+            />
+          </div>
+          <div>
+            <Label htmlFor="email" tone="dark">Email</Label>
+            <Input
+              id="email"
+              tone="dark"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              placeholder="toi@parinator.app"
+            />
+          </div>
+        </>
+      ) : (
+        <div>
+          <Label htmlFor="identifier" tone="dark">Pseudo ou email</Label>
+          <Input
+            id="identifier"
+            tone="dark"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            autoComplete="username"
+          />
+        </div>
+      )}
+      <div>
+        <Label htmlFor="password" tone="dark">Mot de passe</Label>
+        <Input
+          id="password"
+          tone="dark"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          type="password"
+          autoComplete={mode === "register" ? "new-password" : "current-password"}
+          placeholder="••••••••"
+        />
+      </div>
+
+      {error && (
+        <div className="bg-rose/10 border border-rose/40 rounded-md px-3 py-2 text-rose text-sm font-mono">
+          {error}
+        </div>
+      )}
+
+      <Button variant="primary" size="lg" disabled={busy} type="submit" className="w-full mt-2">
+        <Check className="w-4 h-4" />
+        {mode === "register" ? "Ouvrir le compte" : "Se connecter"}
+      </Button>
+    </form>
+  );
+
+  return (
+    <main className="min-h-[100dvh] lg:grid lg:grid-cols-[1.05fr_1fr] flex flex-col">
+      {/* HERO — desktop only */}
+      <section className="hidden lg:flex relative flex-col justify-between p-12 overflow-hidden">
+        <div className="flex items-center gap-3 rise" style={{ animationDelay: "60ms" }}>
+          <div className="w-10 h-10 rounded-md bg-lime grid place-items-center shadow-[0_2px_0_var(--color-lime-deep)]">
+            <Swords className="w-5 h-5 text-black" strokeWidth={2.5} />
+          </div>
+          <div>
+            <p className="font-display text-2xl uppercase tracking-tight leading-none">Parinator</p>
+            <p className="eyebrow mt-1">paris entre potes · saison 01</p>
+          </div>
+        </div>
+
+        <div className="max-w-xl rise" style={{ animationDelay: "180ms" }}>
+          <p className="eyebrow mb-4">Manifeste</p>
+          <h2 className="font-display uppercase tracking-tight leading-[0.92] text-[clamp(2.6rem,7vw,5.5rem)]">
+            Les paris<br />
+            <span className="text-lime">entre potes</span><br />
+            sans crypto<br />
+            ni casino.
+          </h2>
+          <p className="mt-6 text-ink-dim text-lg max-w-md leading-relaxed">
+            Lance un défi, fixe les cotes, partage le ticket. Les dettes se règlent
+            en points — et entre vous.
+          </p>
+
+          <FeatureRow />
+        </div>
+
+        <div className="flex items-center justify-between text-ink-dim rise" style={{ animationDelay: "300ms" }}>
+          <p className="font-mono text-xs tracking-[0.2em] uppercase">// v0.1 — beta</p>
+          <p className="font-mono text-xs tracking-[0.2em] uppercase">100% entre amis</p>
+        </div>
+      </section>
+
+      {/* MOBILE compact header */}
+      <section className="lg:hidden px-5 pt-6 pb-3 rise" style={{ animationDelay: "60ms" }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-md bg-lime grid place-items-center shadow-[0_2px_0_var(--color-lime-deep)]">
+              <Swords className="w-4 h-4 text-black" strokeWidth={2.5} />
+            </div>
+            <p className="font-display text-xl uppercase tracking-tight leading-none">Parinator</p>
+          </div>
+          <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-ink-dim">
+            entre potes
+          </p>
+        </div>
+      </section>
+
+      {/* FORM PANEL */}
+      <section className="relative flex-1 flex flex-col justify-center px-5 pb-6 lg:p-12 lg:border-l border-edge/60 lg:bg-canvas-soft/40">
+        <div className="w-full max-w-md mx-auto lg:space-y-4 rise" style={{ animationDelay: "360ms" }}>
+
+          {/* Mobile-only tagline + shared bet hint */}
+          <div className="lg:hidden mb-5">
+            <p className="eyebrow mb-2">Manifeste</p>
+            <h1 className="font-display uppercase tracking-tight leading-[0.95] text-4xl">
+              Les paris<br />
+              <span className="text-lime">entre potes.</span>
+            </h1>
+          </div>
+
+          {sharedBet && (
+            <div className="mb-4 flex items-center gap-3 p-3 rounded-lg border border-lime/30 bg-lime/[0.06]">
+              <Sparkles className="w-4 h-4 text-lime shrink-0" />
+              <div className="min-w-0">
+                <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-lime">
+                  Ticket {ticketNumber(sharedBet.shareCode)}
+                </p>
+                <p className="font-display text-sm uppercase tracking-tight truncate">
+                  {sharedBet.title}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Desktop heading */}
+          <div className="hidden lg:flex items-start justify-between mb-2">
+            <div>
+              <p className="eyebrow">Accès compte</p>
+              <h2 className="font-display text-3xl uppercase tracking-tight mt-1">
+                {mode === "register" ? "Nouveau membre" : "Bon retour"}
+              </h2>
+            </div>
+          </div>
+
+          {/* Mobile heading */}
+          <p className="lg:hidden eyebrow mb-3">
+            {mode === "register" ? "Nouveau membre" : "Bon retour"}
+          </p>
+
+          <Segmented<"register" | "login">
+            tone="dark"
+            value={mode}
+            onChange={setMode}
+            options={[
+              { value: "register", label: "Compte" },
+              { value: "login", label: "Connexion" }
+            ]}
+            className="mb-4"
+          />
+
+          {formFields}
+
+          {/* Footer line — desktop with perforation, mobile compact */}
+          <div className="mt-5 lg:mt-6 flex items-center gap-3 text-ink-faint">
+            <span className="flex-1 h-px bg-edge" />
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-dim text-center whitespace-nowrap">
+              0 carte bancaire · 0 robot
+            </p>
+            <span className="flex-1 h-px bg-edge" />
+          </div>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+function FeatureRow() {
+  const items = [
+    { icon: <TicketIcon className="w-3 h-3" />, label: "Ticket" },
+    { icon: <Flame className="w-3 h-3" />, label: "Cotes live" },
+    { icon: <Trophy className="w-3 h-3" />, label: "Gagnant" },
+    { icon: <HandCoins className="w-3 h-3" />, label: "Dettes" }
+  ];
+  return (
+    <div className="mt-8 inline-flex items-center gap-0 rounded-full border border-edge bg-surface/40 backdrop-blur p-1">
+      {items.map((item, i) => (
+        <span key={item.label} className="flex items-center">
+          {i > 0 && <span className="w-px h-4 bg-edge mx-1" />}
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-ink-dim font-mono text-[10px] tracking-[0.16em] uppercase">
+            <span className="text-lime">{item.icon}</span>
+            {item.label}
+          </span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   BetsView
+   ───────────────────────────────────────────── */
+
+function BetsView({
+  bets,
+  friends,
+  user,
+  token,
+  sharedBet,
+  onRefresh,
+  onError,
+  onToast,
+  reloadShared
+}: {
+  bets: BetsResponse;
+  friends: User[];
+  user: User;
+  token: string;
+  sharedBet: Bet | null;
+  onRefresh: () => Promise<void>;
+  onError: (error: unknown) => void;
+  onToast: (message: string) => void;
+  reloadShared: () => void;
+}) {
+  const invitations = bets.mine.filter((bet) =>
+    bet.participants.some(
+      (participant) => participant.userId === user.id && participant.status === "invited"
+    )
+  );
+  const activeMine = bets.mine.filter((bet) => !invitations.some((invite) => invite.id === bet.id));
+
+  return (
+    <div className="space-y-10">
+      {sharedBet && (
+        <SharedBetCard
+          bet={sharedBet}
+          user={user}
+          token={token}
+          onRefresh={async () => {
+            reloadShared();
+            await onRefresh();
+          }}
+          onError={onError}
+          onToast={onToast}
+        />
+      )}
+
+      {invitations.length > 0 && (
+        <Section
+          eyebrow="// invitations en attente"
+          title="Ton aval requis"
+          icon={<Bell className="w-4 h-4" />}
+          count={invitations.length}
+        >
+          <CardGrid>
+            {invitations.map((bet, i) => (
+              <BetCard
+                bet={bet}
+                user={user}
+                friends={friends}
+                token={token}
+                key={bet.id}
+                onRefresh={onRefresh}
+                onError={onError}
+                onToast={onToast}
+                delay={i * 70}
+              />
+            ))}
+          </CardGrid>
+        </Section>
+      )}
+
+      <Section
+        eyebrow="// tes paris"
+        title="Carnet personnel"
+        icon={<TicketIcon className="w-4 h-4" />}
+        count={activeMine.length}
+        empty={activeMine.length === 0 ? "Aucun pari pour le moment. Lance-toi." : undefined}
+      >
+        <CardGrid>
+          {activeMine.map((bet, i) => (
+            <BetCard
+              bet={bet}
+              user={user}
+              friends={friends}
+              token={token}
+              key={bet.id}
+              onRefresh={onRefresh}
+              onError={onError}
+              onToast={onToast}
+              delay={i * 70}
+            />
+          ))}
+        </CardGrid>
+      </Section>
+
+      <Section
+        eyebrow="// scène ouverte"
+        title="Paris des potes"
+        icon={<Users className="w-4 h-4" />}
+        count={bets.friends.length}
+        empty={bets.friends.length === 0 ? "Personne n'a encore lancé de défi." : undefined}
+      >
+        <CardGrid>
+          {bets.friends.map((bet, i) => (
+            <BetCard
+              bet={bet}
+              user={user}
+              friends={friends}
+              token={token}
+              key={bet.id}
+              onRefresh={onRefresh}
+              onError={onError}
+              onToast={onToast}
+              delay={i * 70}
+            />
+          ))}
+        </CardGrid>
+      </Section>
+    </div>
+  );
+}
+
+function Section({
+  eyebrow,
+  title,
+  icon,
+  count,
+  empty,
+  children
+}: {
+  eyebrow: string;
+  title: string;
+  icon: ReactNode;
+  count?: number;
+  empty?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-4">
+      <header className="flex items-end justify-between gap-3 pb-2 border-b border-edge/60">
+        <div>
+          <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-ink-dim">
+            {eyebrow}
+          </p>
+          <div className="flex items-baseline gap-3 mt-1">
+            <h2 className="font-display text-3xl sm:text-4xl uppercase tracking-tight leading-none">
+              {title}
+            </h2>
+            {typeof count === "number" && (
+              <span className="font-mono text-base text-ink-dim tabular">[{String(count).padStart(2, "0")}]</span>
+            )}
+          </div>
+        </div>
+        <span className="hidden sm:inline-flex items-center gap-2 text-ink-dim">
+          {icon}
+        </span>
+      </header>
+
+      {empty ? (
+        <div className="ticket ticket-dark p-8 text-center">
+          <p className="font-mono text-xs tracking-[0.18em] uppercase text-ink-dim">{empty}</p>
+        </div>
+      ) : (
+        children
+      )}
+    </section>
+  );
+}
+
+function CardGrid({ children }: { children: ReactNode }) {
+  return <div className="grid sm:grid-cols-2 gap-5">{children}</div>;
+}
+
+/* ─────────────────────────────────────────────
+   SharedBetCard (lien /join/:code)
+   ───────────────────────────────────────────── */
+
+function SharedBetCard({
+  bet,
+  user,
+  token,
+  onRefresh,
+  onError,
+  onToast
+}: {
+  bet: Bet;
+  user: User;
+  token: string;
+  onRefresh: () => Promise<void>;
+  onError: (error: unknown) => void;
+  onToast: (message: string) => void;
+}) {
+  const [side, setSide] = useState<Side>("A");
+  const [amount, setAmount] = useState(String(bet.stake));
+  const myParticipant = bet.participants.find((p) => p.userId === user.id);
+  const canJoin = bet.status === "open" && myParticipant?.status !== "accepted";
+
+  const join = async () => {
+    try {
+      await apiRequest<Bet>(`/api/bets/join/${bet.shareCode}`, token, {
+        method: "POST",
+        body: { side, amount: Number(amount) }
+      });
+      onToast("Pari rejoint.");
+      await onRefresh();
+    } catch (error) {
+      onError(error);
+    }
+  };
+
+  return (
+    <Card className="pop">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div>
+          <p className="eyebrow-ink flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-ember" /> Invitation par lien
+          </p>
+          <h2 className="font-display text-2xl sm:text-3xl uppercase tracking-tight leading-tight mt-1">
+            {bet.title}
+          </h2>
+        </div>
+        <Badge tone="lime" align="flat" className="!text-ticket-ink !bg-lime">
+          № {ticketNumber(bet.shareCode)}
+        </Badge>
+      </div>
+
+      <SideMatchup bet={bet} />
+
+      <div className="perforation my-5" />
+
+      {canJoin ? (
+        <div className="space-y-3">
+          <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
+            <div>
+              <Label>Ton camp</Label>
+              <SideSelector side={side} setSide={setSide} bet={bet} tone="ink" />
+            </div>
+            <div>
+              <Label>Mise</Label>
+              <Input
+                type="number"
+                min={1}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                mono
+                className="w-full sm:w-32"
+              />
+            </div>
+          </div>
+          <Button variant="ink" onClick={join} size="lg" className="w-full">
+            <Send className="w-4 h-4" />
+            Rejoindre le pari
+          </Button>
+        </div>
+      ) : (
+        <Badge tone="done" align="flat" className="!text-jade">
+          Déjà dans le coup
+        </Badge>
+      )}
+    </Card>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   BetCard
+   ───────────────────────────────────────────── */
+
+function BetCard({
+  bet,
+  user,
+  friends,
+  token,
+  onRefresh,
+  onError,
+  onToast,
+  delay = 0
+}: {
+  bet: Bet;
+  user: User;
+  friends: User[];
+  token: string;
+  onRefresh: () => Promise<void>;
+  onError: (error: unknown) => void;
+  onToast: (message: string) => void;
+  delay?: number;
+}) {
+  const [side, setSide] = useState<Side>("A");
+  const [amount, setAmount] = useState(String(bet.stake));
+  const [inviteUserId, setInviteUserId] = useState("");
+  const myParticipant = bet.participants.find((p) => p.userId === user.id);
+  const isInvitation = myParticipant?.status === "invited" && bet.status === "open";
+  const isInitiator = bet.initiatorId === user.id;
+  const availableInvitees = friends.filter(
+    (friend) => !bet.participants.some((p) => p.userId === friend.id)
+  );
+
+  const respond = async (accept: boolean) => {
+    try {
+      await apiRequest<Bet>(`/api/bets/${bet.id}/respond`, token, {
+        method: "POST",
+        body: accept ? { accept, side, amount: Number(amount) } : { accept }
+      });
+      onToast(accept ? "Invitation acceptée." : "Invitation refusée.");
+      await onRefresh();
+    } catch (error) {
+      onError(error);
+    }
+  };
+
+  const resolve = async (winningSide: Side) => {
+    try {
+      await apiRequest<Bet>(`/api/bets/${bet.id}/resolve`, token, {
+        method: "POST",
+        body: { winningSide }
+      });
+      onToast("Résultat enregistré.");
+      await onRefresh();
+    } catch (error) {
+      onError(error);
+    }
+  };
+
+  const copyShare = async () => {
+    const url = `${window.location.origin}/join/${bet.shareCode}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      onToast("Lien copié.");
+    } catch {
+      onToast(url);
+    }
+  };
+
+  const inviteFriend = async () => {
+    if (!inviteUserId) return;
+    try {
+      await apiRequest<Bet>(`/api/bets/${bet.id}/invite`, token, {
+        method: "POST",
+        body: { userIds: [inviteUserId] }
+      });
+      setInviteUserId("");
+      onToast("Invitation envoyée.");
+      await onRefresh();
+    } catch (error) {
+      onError(error);
+    }
+  };
+
+  const statusBadge =
+    bet.status === "resolved" ? (
+      <Badge tone="done">
+        <Trophy className="w-3 h-3" />
+        Terminé
+      </Badge>
+    ) : isInvitation ? (
+      <Badge tone="pending">
+        <Bell className="w-3 h-3" />
+        Invitation
+      </Badge>
+    ) : (
+      <Badge tone="live">
+        <Flame className="w-3 h-3" />
+        En cours
+      </Badge>
+    );
+
+  return (
+    <Card className="rise" style={{ animationDelay: `${delay}ms` } as React.CSSProperties}>
+      {/* HEADER */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ticket-ink-dim">
+              Ticket № {ticketNumber(bet.shareCode)}
+            </span>
+            <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-ticket-ink-dim">
+              · par {bet.initiatorUsername}
+            </span>
+          </div>
+          <h3 className="font-display text-xl sm:text-2xl uppercase tracking-tight leading-[1.05]">
+            {bet.title}
+          </h3>
+          {bet.description && (
+            <p className="mt-2 text-sm text-ticket-ink-dim leading-relaxed">{bet.description}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {statusBadge}
+          <button
+            type="button"
+            onClick={copyShare}
+            className="w-11 h-11 rounded-xl border border-ticket-edge hover:bg-ticket-ink/5 grid place-items-center text-ticket-ink"
+            aria-label="Partager"
+            title="Partager"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* MATCHUP */}
+      <div className="mt-5">
+        <SideMatchup bet={bet} />
+      </div>
+
+      {/* PERFORATION */}
+      <div className="perforation my-5" />
+
+      {/* PARTICIPANTS */}
+      <div>
+        <p className="eyebrow-ink mb-2">Participants · {bet.participants.length}</p>
+        <div className="flex flex-wrap gap-1.5">
+          {bet.participants.length === 0 && (
+            <span className="font-mono text-xs text-ticket-ink-dim">Aucun engagé.</span>
+          )}
+          {bet.participants.map((p) => (
+            <ParticipantChip key={p.id} participant={p} bet={bet} />
+          ))}
+        </div>
+      </div>
+
+      {/* INVITATION */}
+      {isInvitation && (
+        <div className="mt-5 rounded-xl border border-ticket-ink/15 bg-ticket-ink/[0.04] p-4 space-y-3">
+          <p className="eyebrow-ink flex items-center gap-1.5">
+            <Bell className="w-3 h-3" />
+            Tu es invité — choisis ton camp
+          </p>
+          <div className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
+            <div>
+              <Label>Ton camp</Label>
+              <SideSelector side={side} setSide={setSide} bet={bet} tone="ink" />
+            </div>
+            <div>
+              <Label>Mise</Label>
+              <Input
+                type="number"
+                min={1}
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                mono
+                className="w-full sm:w-32"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="ink" onClick={() => respond(true)} className="flex-1">
+              <Check className="w-4 h-4" />
+              Accepter
+            </Button>
+            <Button variant="danger" onClick={() => respond(false)} className="flex-1">
+              <X className="w-4 h-4" />
+              Refuser
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* INITIATOR — invite + résolution */}
+      {isInitiator && bet.status === "open" && (
+        <div className="mt-5 space-y-3">
+          {availableInvitees.length > 0 && (
+            <div className="grid sm:grid-cols-[1fr_auto] gap-2 items-end">
+              <div>
+                <Label>Inviter un pote</Label>
+                <select
+                  value={inviteUserId}
+                  onChange={(e) => setInviteUserId(e.target.value)}
+                  className="field"
+                >
+                  <option value="">— sélectionne —</option>
+                  {availableInvitees.map((friend) => (
+                    <option value={friend.id} key={friend.id}>
+                      {friend.username}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Button variant="ghostInk" onClick={inviteFriend}>
+                <UserPlus className="w-4 h-4" />
+                Inviter
+              </Button>
+            </div>
+          )}
+          <div className="rounded-xl border border-dashed border-ticket-ink/25 p-3">
+            <p className="eyebrow-ink mb-2 flex items-center gap-1.5">
+              <Crown className="w-3 h-3" />
+              Désigner le gagnant
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="ghostInk" onClick={() => resolve("A")}>
+                <Trophy className="w-4 h-4" />
+                {bet.sideA}
+              </Button>
+              <Button variant="ghostInk" onClick={() => resolve("B")}>
+                <Trophy className="w-4 h-4" />
+                {bet.sideB}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function ParticipantChip({
+  participant,
+  bet
+}: {
+  participant: BetParticipant;
+  bet: Bet;
+}) {
+  const isWinner =
+    bet.status === "resolved" &&
+    bet.winningSide !== null &&
+    participant.side === bet.winningSide &&
+    participant.status === "accepted";
+
+  let chipClass = "border-ticket-ink/20 bg-ticket-ink/[0.04] text-ticket-ink";
+  if (participant.status === "invited")
+    chipClass = "border-amber/40 bg-amber/10 text-amber";
+  if (participant.status === "declined")
+    chipClass = "border-rose/40 bg-rose/10 text-rose line-through";
+  if (isWinner)
+    chipClass = "border-lime-deep bg-lime text-canvas font-bold";
+
+  return (
+    <span className={cn("chip", chipClass)}>
+      <span
+        className={cn(
+          "chip-avatar",
+          isWinner ? "bg-canvas/15 text-canvas" : "bg-ticket-ink/10 text-ticket-ink"
+        )}
+      >
+        {initials(participant.username)}
+      </span>
+      {participant.username}
+      {participant.side && (
+        <span className="font-display tracking-wide">· {sideLabel(bet, participant.side)}</span>
+      )}
+      {participant.amount > 0 && (
+        <span className="font-display tabular">· {participant.amount}</span>
+      )}
+      {isWinner && <Crown className="w-3 h-3" />}
+    </span>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Side matchup — VS centerpiece
+   ───────────────────────────────────────────── */
+
+function SideMatchup({ bet }: { bet: Pick<Bet, "sideA" | "sideB" | "oddsA" | "oddsB" | "winningSide"> }) {
+  return (
+    <div className="relative grid grid-cols-2 gap-3 sm:gap-4">
+      <SideBox
+        label={bet.sideA}
+        odds={bet.oddsA}
+        active={bet.winningSide === "A"}
+        loser={bet.winningSide === "B"}
+        align="left"
+      />
+      <SideBox
+        label={bet.sideB}
+        odds={bet.oddsB}
+        active={bet.winningSide === "B"}
+        loser={bet.winningSide === "A"}
+        align="right"
+      />
+      <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 grid place-items-center pointer-events-none">
+        <div className="vs-badge">VS</div>
+      </div>
+    </div>
+  );
+}
+
+function SideBox({
+  label,
+  odds,
+  active,
+  loser,
+  align
+}: {
+  label: string;
+  odds: number;
+  active: boolean;
+  loser: boolean;
+  align: "left" | "right";
+}) {
+  return (
+    <div
+      className={cn(
+        "relative rounded-xl border-2 p-3 sm:p-4 min-h-[110px] flex flex-col overflow-hidden",
+        active && "border-lime-deep bg-lime/15",
+        loser && "border-ticket-edge bg-ticket-warm/40 opacity-60",
+        !active && !loser && "border-ticket-ink/15 bg-white/30"
+      )}
+    >
+      {/* Decorative corner stamp */}
+      <span
+        className={cn(
+          "absolute top-2 font-mono text-[9px] tracking-[0.2em] uppercase opacity-60",
+          align === "left" ? "left-3" : "right-3"
+        )}
+      >
+        Camp {align === "left" ? "A" : "B"}
+      </span>
+      {/* Diagonal stripe for losing side */}
+      {loser && (
+        <div className="absolute inset-0 stripes opacity-[0.06] pointer-events-none" />
+      )}
+      {active && (
+        <div className="absolute -top-1 -right-1">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-canvas text-lime font-mono text-[9px] tracking-[0.2em] uppercase">
+            <Crown className="w-2.5 h-2.5" /> WIN
+          </span>
+        </div>
+      )}
+      <div className={cn("mt-5 flex flex-col", align === "right" && "items-end text-right")}>
+        <p className="font-display text-base sm:text-lg uppercase tracking-tight leading-tight break-words">
+          {label}
+        </p>
+        <div className="mt-1 flex items-baseline gap-1">
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-ticket-ink-dim">
+            ×
+          </span>
+          <span className="numframe text-3xl sm:text-4xl">{odds.toFixed(2)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SideSelector({
+  side,
+  setSide,
+  bet,
+  tone = "dark"
+}: {
+  side: Side;
+  setSide: (side: Side) => void;
+  bet: Pick<Bet, "sideA" | "sideB">;
+  tone?: "ink" | "dark";
+}) {
+  return (
+    <Segmented<Side>
+      tone={tone}
+      value={side}
+      onChange={setSide}
+      options={[
+        { value: "A", label: bet.sideA || "A" },
+        { value: "B", label: bet.sideB || "B" }
+      ]}
+    />
+  );
+}
+
+/* ─────────────────────────────────────────────
+   CreateBetView
+   ───────────────────────────────────────────── */
+
+function CreateBetView({
+  friends,
+  token,
+  onCreated,
+  onError
+}: {
+  friends: User[];
+  token: string;
+  onCreated: (bet: Bet) => void;
+  onError: (error: unknown) => void;
+}) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [sideA, setSideA] = useState("Oui");
+  const [sideB, setSideB] = useState("Non");
+  const [oddsA, setOddsA] = useState("2.00");
+  const [oddsB, setOddsB] = useState("2.00");
+  const [stake, setStake] = useState("10");
+  const [mySide, setMySide] = useState<Side>("A");
+  const [invitedUserIds, setInvitedUserIds] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      const bet = await apiRequest<Bet>("/api/bets", token, {
+        method: "POST",
+        body: {
+          title,
+          description,
+          sideA,
+          sideB,
+          oddsA: Number(oddsA),
+          oddsB: Number(oddsB),
+          stake: Number(stake),
+          mySide,
+          invitedUserIds
+        }
+      });
+      setTitle("");
+      setDescription("");
+      setInvitedUserIds([]);
+      onCreated(bet);
+    } catch (error) {
+      onError(error);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const toggleInvite = (friendId: string) => {
+    setInvitedUserIds((current) =>
+      current.includes(friendId)
+        ? current.filter((id) => id !== friendId)
+        : [...current, friendId]
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <header className="border-b border-edge/60 pb-3 flex items-end justify-between gap-3">
+        <div>
+          <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-ink-dim">
+            // nouveau ticket
+          </p>
+          <h2 className="font-display text-3xl sm:text-4xl uppercase tracking-tight leading-none mt-1">
+            Lancer un défi
+          </h2>
+        </div>
+        <span className="hidden sm:inline-flex font-mono text-[10px] tracking-[0.2em] uppercase text-ink-dim border border-edge px-2 py-1 rounded-md">
+          À émettre
+        </span>
+      </header>
+
+      <form onSubmit={submit} className="space-y-5">
+        <div>
+          <Label htmlFor="title" tone="dark">Titre du pari</Label>
+          <Input
+            id="title"
+            tone="dark"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Qui finit la pinte en premier ?"
+            required
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="description" tone="dark">Détail (facultatif)</Label>
+          <Textarea
+            id="description"
+            tone="dark"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Précise les règles, le contexte, l'enjeu…"
+            rows={3}
+          />
+        </div>
+
+        <div className="rounded-xl border-2 border-dashed border-edge-strong p-4 sm:p-5 bg-surface/40">
+          <p className="eyebrow mb-3 flex items-center gap-1.5">
+            <Swords className="w-3 h-3" />
+            Configuration du duel
+          </p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <Label tone="dark">Camp A</Label>
+              <Input tone="dark" value={sideA} onChange={(e) => setSideA(e.target.value)} />
+              <Label tone="dark" className="mt-3">Cote A</Label>
+              <Input
+                tone="dark"
+                type="number"
+                min={1}
+                step={0.01}
+                value={oddsA}
+                onChange={(e) => setOddsA(e.target.value)}
+                mono
+              />
+            </div>
+            <div>
+              <Label tone="dark">Camp B</Label>
+              <Input tone="dark" value={sideB} onChange={(e) => setSideB(e.target.value)} />
+              <Label tone="dark" className="mt-3">Cote B</Label>
+              <Input
+                tone="dark"
+                type="number"
+                min={1}
+                step={0.01}
+                value={oddsB}
+                onChange={(e) => setOddsB(e.target.value)}
+                mono
+              />
+            </div>
+          </div>
+          <div className="mt-4">
+            <Label tone="dark">Mise de référence</Label>
+            <Input
+              tone="dark"
+              type="number"
+              min={1}
+              value={stake}
+              onChange={(e) => setStake(e.target.value)}
+              mono
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label tone="dark">Ton camp</Label>
+          <SideSelector
+            side={mySide}
+            setSide={setMySide}
+            bet={{ sideA: sideA || "A", sideB: sideB || "B" }}
+            tone="dark"
+          />
+        </div>
+
+        <div>
+          <Label tone="dark">Inviter des potes</Label>
+          {friends.length === 0 ? (
+            <p className="font-mono text-xs text-ink-dim italic">
+              Ajoute d'abord un ami pour pouvoir l'inviter.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {friends.map((friend) => {
+                const checked = invitedUserIds.includes(friend.id);
+                return (
+                  <button
+                    type="button"
+                    key={friend.id}
+                    onClick={() => toggleInvite(friend.id)}
+                    style={
+                      checked
+                        ? { backgroundColor: "#d5f25c", color: "#000000" }
+                        : undefined
+                    }
+                    className={cn(
+                      "flex items-center gap-2 p-2 rounded-xl border-2 transition-colors text-left",
+                      checked
+                        ? "border-lime-deep font-bold shadow-[0_2px_0_var(--color-lime-deep)]"
+                        : "border-edge bg-surface hover:border-edge-strong"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "w-7 h-7 rounded-full grid place-items-center font-display text-xs shrink-0",
+                        checked ? "bg-black/15 text-black" : "bg-surface-strong text-ink-dim"
+                      )}
+                    >
+                      {initials(friend.username)}
+                    </span>
+                    <span className="text-sm font-medium truncate">{friend.username}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <Button variant="primary" size="lg" disabled={busy} type="submit" className="w-full">
+          <Send className="w-4 h-4" />
+          Émettre le ticket
+        </Button>
+      </form>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   FriendsView
+   ───────────────────────────────────────────── */
+
+function FriendsView({
+  friends,
+  token,
+  onRefresh,
+  onError,
+  onToast
+}: {
+  friends: FriendsResponse;
+  token: string;
+  onRefresh: () => Promise<void>;
+  onError: (error: unknown) => void;
+  onToast: (message: string) => void;
+}) {
+  const [identifier, setIdentifier] = useState("");
+
+  const addFriend = async (event: FormEvent) => {
+    event.preventDefault();
+    try {
+      await apiRequest<FriendRequest>("/api/friends", token, {
+        method: "POST",
+        body: { identifier }
+      });
+      setIdentifier("");
+      onToast("Invitation envoyée.");
+      await onRefresh();
+    } catch (error) {
+      onError(error);
+    }
+  };
+
+  const accept = async (id: string) => {
+    try {
+      await apiRequest<FriendsResponse>(`/api/friends/${id}/accept`, token, { method: "POST" });
+      onToast("Invitation acceptée.");
+      await onRefresh();
+    } catch (error) {
+      onError(error);
+    }
+  };
+
+  const remove = async (id: string) => {
+    try {
+      await apiRequest<FriendsResponse>(`/api/friends/${id}`, token, { method: "DELETE" });
+      onToast("Invitation retirée.");
+      await onRefresh();
+    } catch (error) {
+      onError(error);
+    }
+  };
+
+  return (
+    <div className="space-y-10">
+      <Section
+        eyebrow="// ajouter"
+        title="Recruter un pote"
+        icon={<UserPlus className="w-4 h-4" />}
+      >
+        <CardDark className="!p-5">
+          <form onSubmit={addFriend} className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
+            <div>
+              <Label tone="dark">Pseudo ou email</Label>
+              <Input
+                tone="dark"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="paulo, marie, contact@..."
+              />
+            </div>
+            <Button variant="primary" type="submit">
+              <Send className="w-4 h-4" />
+              Envoyer
+            </Button>
+          </form>
+        </CardDark>
+      </Section>
+
+      <Section
+        eyebrow="// reçues"
+        title="Pour toi"
+        icon={<Bell className="w-4 h-4" />}
+        count={friends.incoming.length}
+        empty={friends.incoming.length === 0 ? "Aucune invitation reçue." : undefined}
+      >
+        <div className="grid sm:grid-cols-2 gap-3">
+          {friends.incoming.map((request, i) => (
+            <CardDark
+              key={request.id}
+              className="!p-4 flex items-center justify-between gap-3 rise"
+              style={{ animationDelay: `${i * 60}ms` } as React.CSSProperties}
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-lime/15 border border-lime/30 grid place-items-center font-display text-sm text-lime shrink-0">
+                  {initials(request.user.username)}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-display text-base uppercase tracking-tight truncate">
+                    {request.user.username}
+                  </p>
+                  <p className="font-mono text-[10px] text-ink-dim tracking-[0.16em] uppercase">
+                    veut entrer
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <Button variant="primary" size="sm" onClick={() => accept(request.id)}>
+                  <Check className="w-3.5 h-3.5" />
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => remove(request.id)}>
+                  <X className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </CardDark>
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        eyebrow="// envoyées"
+        title="En attente"
+        icon={<Send className="w-4 h-4" />}
+        count={friends.outgoing.length}
+        empty={friends.outgoing.length === 0 ? "Aucune invitation envoyée." : undefined}
+      >
+        <div className="grid sm:grid-cols-2 gap-3">
+          {friends.outgoing.map((request) => (
+            <CardDark key={request.id} className="!p-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-ink/10 border border-edge grid place-items-center font-display text-sm text-ink-dim shrink-0">
+                  {initials(request.user.username)}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-display text-base uppercase tracking-tight truncate">
+                    {request.user.username}
+                  </p>
+                  <p className="font-mono text-[10px] text-amber tracking-[0.16em] uppercase">
+                    ● en attente
+                  </p>
+                </div>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => remove(request.id)}>
+                <X className="w-3.5 h-3.5" />
+              </Button>
+            </CardDark>
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        eyebrow="// roster"
+        title="Tes potes"
+        icon={<Users className="w-4 h-4" />}
+        count={friends.friends.length}
+        empty={friends.friends.length === 0 ? "Aucun pote ajouté. Recrute." : undefined}
+      >
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {friends.friends.map((friend, i) => (
+            <div
+              key={friend.id}
+              className="ticket ticket-dark !p-4 text-center rise"
+              style={{ animationDelay: `${i * 50}ms` } as React.CSSProperties}
+            >
+              <div className="relative mx-auto w-14 h-14">
+                <div className="absolute inset-0 rounded-full bg-lime/20 blur-md" />
+                <div className="relative w-14 h-14 rounded-full bg-lime grid place-items-center font-display text-xl text-canvas">
+                  {initials(friend.username)}
+                </div>
+              </div>
+              <p className="mt-3 font-display text-base uppercase tracking-tight truncate">
+                {friend.username}
+              </p>
+              <p className="font-mono text-[10px] text-ink-dim tracking-[0.16em] uppercase">
+                membre
+              </p>
+            </div>
+          ))}
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   DebtsView
+   ───────────────────────────────────────────── */
+
+function DebtsView({
+  debts,
+  token,
+  onRefresh,
+  onError
+}: {
+  debts: DebtsResponse;
+  token: string;
+  onRefresh: () => Promise<void>;
+  onError: (error: unknown) => void;
+}) {
+  const settle = async (debtId: string) => {
+    try {
+      await apiRequest<Debt>(`/api/debts/${debtId}/settle`, token, { method: "POST" });
+      await onRefresh();
+    } catch (error) {
+      onError(error);
+    }
+  };
+
+  const totalOwe = debts.iOwe.reduce((sum, d) => (d.status === "open" ? sum + d.amount : sum), 0);
+  const totalOwed = debts.owedToMe.reduce((sum, d) => (d.status === "open" ? sum + d.amount : sum), 0);
+  const net = totalOwed - totalOwe;
+
+  return (
+    <div className="space-y-8">
+      {/* SCOREBOARD */}
+      <header className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <ScoreCard
+          eyebrow="// tu dois"
+          value={totalOwe}
+          color="ember"
+          icon={<ArrowUpRight className="w-4 h-4" />}
+        />
+        <ScoreCard
+          eyebrow="// on te doit"
+          value={totalOwed}
+          color="lime"
+          icon={<ArrowDownRight className="w-4 h-4" />}
+        />
+        <ScoreCard
+          eyebrow="// balance"
+          value={net}
+          color={net >= 0 ? "jade" : "rose"}
+          icon={<CircleDollarSign className="w-4 h-4" />}
+          signed
+        />
+      </header>
+
+      <Section
+        eyebrow="// passif"
+        title="Je dois"
+        icon={<ArrowUpRight className="w-4 h-4" />}
+        count={debts.iOwe.length}
+        empty={debts.iOwe.length === 0 ? "Aucune dette ouverte. Bien joué." : undefined}
+      >
+        <div className="grid sm:grid-cols-2 gap-3">
+          {debts.iOwe.map((debt, i) => (
+            <DebtCard
+              debt={debt}
+              key={debt.id}
+              mode="owe"
+              onSettle={settle}
+              delay={i * 60}
+            />
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        eyebrow="// actif"
+        title="On me doit"
+        icon={<ArrowDownRight className="w-4 h-4" />}
+        count={debts.owedToMe.length}
+        empty={debts.owedToMe.length === 0 ? "Personne ne te doit rien." : undefined}
+      >
+        <div className="grid sm:grid-cols-2 gap-3">
+          {debts.owedToMe.map((debt, i) => (
+            <DebtCard
+              debt={debt}
+              key={debt.id}
+              mode="owed"
+              onSettle={settle}
+              delay={i * 60}
+            />
+          ))}
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+function ScoreCard({
+  eyebrow,
+  value,
+  color,
+  icon,
+  signed = false
+}: {
+  eyebrow: string;
+  value: number;
+  color: "ember" | "lime" | "jade" | "rose";
+  icon: ReactNode;
+  signed?: boolean;
+}) {
+  const colorClass =
+    color === "ember"
+      ? "text-ember"
+      : color === "lime"
+        ? "text-lime"
+        : color === "jade"
+          ? "text-jade"
+          : "text-rose";
+  return (
+    <CardDark className="!p-4 flex items-center justify-between gap-3">
+      <div>
+        <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-dim">{eyebrow}</p>
+        <p className={cn("numframe text-4xl mt-1", colorClass)}>
+          {signed && value > 0 ? "+" : ""}
+          {value}
+          <span className="font-mono text-xs text-ink-dim tracking-[0.18em] uppercase ml-1.5">
+            pts
+          </span>
+        </p>
+      </div>
+      <div className={cn("w-10 h-10 rounded-md grid place-items-center bg-surface-strong", colorClass)}>
+        {icon}
+      </div>
+    </CardDark>
+  );
+}
+
+function DebtCard({
+  debt,
+  mode,
+  onSettle,
+  delay = 0
+}: {
+  debt: Debt;
+  mode: "owe" | "owed";
+  onSettle: (debtId: string) => void;
+  delay?: number;
+}) {
+  const settled = debt.status === "settled";
+  const accentColor = mode === "owe" ? "text-ember" : "text-lime";
+
+  return (
+    <Card
+      className={cn("flex flex-col gap-3 rise", settled && "opacity-70")}
+      style={{ animationDelay: `${delay}ms` } as React.CSSProperties}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="eyebrow-ink">
+            {mode === "owe" ? "Tu dois à" : "Te doit"}
+          </p>
+          <p className="font-display text-lg uppercase tracking-tight truncate mt-0.5">
+            {mode === "owe" ? debt.creditorUsername : debt.debtorUsername}
+          </p>
+        </div>
+        {settled ? (
+          <Badge tone="done" align="flat">
+            <Check className="w-3 h-3" />
+            Réglée
+          </Badge>
+        ) : (
+          <Badge tone="live" align="flat">
+            <Flame className="w-3 h-3" />
+            Ouverte
+          </Badge>
+        )}
+      </div>
+
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-ticket-ink-dim">
+            Montant
+          </p>
+          <p className={cn("numframe text-5xl", accentColor)}>
+            {debt.amount}
+            <span className="font-mono text-xs text-ticket-ink-dim tracking-[0.18em] uppercase ml-1.5">
+              pts
+            </span>
+          </p>
+        </div>
+        <div className="vs-badge" style={{ transform: "rotate(8deg) scale(0.7)" }}>
+          {mode === "owe" ? "←" : "→"}
+        </div>
+      </div>
+
+      <div className="perforation" />
+
+      <p className="font-mono text-xs text-ticket-ink-dim truncate">
+        Ticket : <span className="text-ticket-ink">{debt.betTitle}</span>
+      </p>
+
+      {!settled && (
+        <Button variant="ink" onClick={() => onSettle(debt.id)} className="w-full">
+          <Check className="w-4 h-4" />
+          Régler
+        </Button>
+      )}
+    </Card>
+  );
+}

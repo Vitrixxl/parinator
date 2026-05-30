@@ -1,0 +1,459 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ───────────────────────────────────────────────
+   PARINATOR
+   Identité : sportsbook nocturne, ticket en papier
+   Polices  : Anton (display) · Instrument Sans · JetBrains Mono
+   ─────────────────────────────────────────────── */
+
+@theme {
+  /* Base canvas — un noir chaud, presque organique */
+  --color-canvas: #0d0e0a;
+  --color-canvas-soft: #14150f;
+  --color-ink: #f2ead8;
+  --color-ink-dim: #8a8675;
+  --color-ink-faint: #4a4738;
+
+  /* Surfaces sombres */
+  --color-surface: #161613;
+  --color-surface-strong: #1e1e1a;
+  --color-surface-deep: #0a0b07;
+
+  /* Papier ticket — pour les cartes héros */
+  --color-ticket: #f4ecd8;
+  --color-ticket-warm: #ebe1c8;
+  --color-ticket-ink: #14130d;
+  --color-ticket-ink-dim: #5b554a;
+  --color-ticket-edge: #d4c8a8;
+
+  /* Accents */
+  --color-lime: #d5f25c;
+  --color-lime-deep: #a8c739;
+  --color-lime-dark: #6b7e26;
+  --color-ember: #ff5a2c;
+  --color-ember-deep: #c93f17;
+  --color-rose: #ff4d6d;
+  --color-jade: #7fe38c;
+  --color-amber: #ffb547;
+
+  /* Borders */
+  --color-edge: #2a2a24;
+  --color-edge-strong: #3a3a32;
+
+  /* shadcn semantic — pour les composants ui/* */
+  --color-background: #0d0e0a;
+  --color-foreground: #f2ead8;
+  --color-card: #161613;
+  --color-card-foreground: #f2ead8;
+  --color-popover: #1e1e1a;
+  --color-popover-foreground: #f2ead8;
+  --color-primary: #d5f25c;
+  --color-primary-foreground: #0d0e0a;
+  --color-secondary: #1e1e1a;
+  --color-secondary-foreground: #f2ead8;
+  --color-muted: #1e1e1a;
+  --color-muted-foreground: #8a8675;
+  --color-accent: #ff5a2c;
+  --color-accent-foreground: #0d0e0a;
+  --color-destructive: #ff4d6d;
+  --color-destructive-foreground: #0d0e0a;
+  --color-border: #2a2a24;
+  --color-input: #2a2a24;
+  --color-ring: #d5f25c;
+
+  /* Polices */
+  --font-display: "Anton", "Bebas Neue", system-ui, sans-serif;
+  --font-sans: "Instrument Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* Rayons */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-2xl: 28px;
+
+  /* Animations sur-mesure */
+  --animate-shimmer: shimmer 2.4s linear infinite;
+}
+
+@keyframes shimmer {
+  from { background-position: 0 0; }
+  to   { background-position: 200% 0; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop {
+  0%   { transform: scale(0.94); opacity: 0; }
+  60%  { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes ticker-roll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ─── Reset minimal ─── */
+* { box-sizing: border-box; }
+
+html, body, #root { min-height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+button, input, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.55; }
+
+::selection {
+  background: var(--color-lime);
+  color: var(--color-canvas);
+}
+
+/* ─── Atmosphère globale ─── */
+.world-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(60vw 50vh at 12% -10%, rgba(213, 242, 92, 0.07), transparent 60%),
+    radial-gradient(50vw 50vh at 100% 110%, rgba(255, 90, 44, 0.06), transparent 60%),
+    linear-gradient(180deg, var(--color-canvas) 0%, var(--color-canvas-soft) 100%);
+}
+
+.world-grain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.45 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.world-wordmark {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  font-family: var(--font-display);
+  font-size: clamp(18rem, 32vw, 42rem);
+  letter-spacing: -0.03em;
+  color: rgba(242, 234, 216, 0.018);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ─── Typo helpers ─── */
+.font-display { font-family: var(--font-display); }
+.font-mono    { font-family: var(--font-mono); }
+.tabular      { font-variant-numeric: tabular-nums; }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-ink-dim);
+}
+.eyebrow::before {
+  content: "// ";
+  color: var(--color-lime);
+}
+
+.eyebrow-ink {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-ticket-ink-dim);
+}
+
+/* ─── Le ticket (carte papier) ─── */
+.ticket {
+  position: relative;
+  background: var(--color-ticket);
+  color: var(--color-ticket-ink);
+  border-radius: 14px;
+  border: 1px solid var(--color-ticket-edge);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 18px 36px -18px rgba(0, 0, 0, 0.5),
+    0 2px 0 rgba(0, 0, 0, 0.35);
+  overflow: visible;
+}
+
+.ticket::after {
+  /* texture papier — point doux */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.078  0 0 0 0 0.075  0 0 0 0 0.05  0 0 0 0.4 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+}
+
+.ticket > * { position: relative; z-index: 1; }
+
+.ticket-dark {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border-color: var(--color-edge);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 18px 36px -18px rgba(0, 0, 0, 0.7),
+    0 2px 0 rgba(0, 0, 0, 0.5);
+}
+.ticket-dark::after { display: none; }
+
+/* Perforation horizontale — séparateur signature (pointillé propre, sans notches) */
+.perforation {
+  position: relative;
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    rgba(20, 19, 13, 0.32) 0,
+    rgba(20, 19, 13, 0.32) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  background-size: 12px 1px;
+  background-repeat: repeat-x;
+}
+
+/* Variante perforation sur fond sombre (cartes ticket-dark) */
+.perforation-dark {
+  background-image: linear-gradient(
+    to right,
+    rgba(242, 234, 216, 0.22) 0,
+    rgba(242, 234, 216, 0.22) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+/* ─── Stamp (status pill) ─── */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  line-height: 1;
+  padding: 0.4rem 0.7rem 0.35rem;
+  border: 1.5px solid currentColor;
+  transform: rotate(-2.5deg);
+  white-space: nowrap;
+  position: relative;
+}
+.stamp-flat { transform: none; }
+.stamp-dot {
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+/* ─── Chip participants ─── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid;
+  text-transform: lowercase;
+}
+.chip-avatar {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+
+/* ─── Hover lift sur le ticket ─── */
+.lift {
+  transition: transform 280ms cubic-bezier(.2,.7,.3,1.2), box-shadow 280ms;
+}
+.lift:hover {
+  transform: translateY(-2px) rotate(-0.25deg);
+}
+
+/* ─── Inputs (sur fond papier) ─── */
+.field {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1.5px solid var(--color-ticket-edge);
+  border-radius: 8px;
+  color: var(--color-ticket-ink);
+  padding: 0.7rem 0.85rem;
+  min-height: 44px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 180ms, box-shadow 180ms;
+}
+.field::placeholder { color: var(--color-ticket-ink-dim); opacity: 0.65; }
+.field:focus {
+  border-color: var(--color-ticket-ink);
+  box-shadow: 0 0 0 3px rgba(20, 19, 13, 0.08);
+}
+.field.field-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* Field sombre — utilisé hors ticket */
+.field-dark {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-edge);
+  border-radius: 8px;
+  color: var(--color-ink);
+  padding: 0.7rem 0.85rem;
+  min-height: 44px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 180ms, box-shadow 180ms;
+}
+.field-dark::placeholder { color: var(--color-ink-dim); opacity: 0.7; }
+.field-dark:focus {
+  border-color: var(--color-lime);
+  box-shadow: 0 0 0 3px rgba(213, 242, 92, 0.18);
+}
+
+/* ─── Label (au-dessus des champs) ─── */
+.label-ink {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ticket-ink-dim);
+  margin-bottom: 0.35rem;
+}
+.label-dim {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ink-dim);
+  margin-bottom: 0.35rem;
+}
+
+/* ─── Big number frame (odds, mises, points) ─── */
+.numframe {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+}
+
+/* ─── VS badge ─── */
+.vs-badge {
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  background: var(--color-ticket-ink);
+  color: var(--color-lime);
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+  transform: rotate(-6deg);
+  box-shadow:
+    0 0 0 4px var(--color-ticket),
+    0 0 0 5.5px var(--color-ticket-ink),
+    0 8px 16px -8px rgba(0, 0, 0, 0.4);
+}
+
+/* ─── Striped bar (decorative band) ─── */
+.stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-ticket-ink) 0 6px,
+    transparent 6px 12px
+  );
+}
+.stripes-lime {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-lime) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+/* ─── Animations utilitaires ─── */
+.rise { animation: rise 480ms cubic-bezier(.2,.7,.3,1) backwards; }
+.pop  { animation: pop  380ms cubic-bezier(.2,.7,.3,1.4) backwards; }
+
+/* ─── Bottom tab bar ─── */
+.tabbar-glow {
+  background:
+    radial-gradient(60% 80% at 50% 0%, rgba(213, 242, 92, 0.06), transparent),
+    var(--color-surface);
+  backdrop-filter: blur(20px);
+}
+
+/* Safe-area iOS */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom { padding-bottom: calc(0.6rem + env(safe-area-inset-bottom)); }
+}
+
+/* Mono numeric input — supprimer les flèches moches */
+input[type="number"].field,
+input[type="number"].field-dark {
+  -moz-appearance: textfield;
+}
+input[type="number"].field::-webkit-outer-spin-button,
+input[type="number"].field::-webkit-inner-spin-button,
+input[type="number"].field-dark::-webkit-outer-spin-button,
+input[type="number"].field-dark::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ─── Scrollbar discret ─── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-edge-strong) transparent;
+}
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb {
+  background: var(--color-edge-strong);
+  border-radius: 999px;
+}
