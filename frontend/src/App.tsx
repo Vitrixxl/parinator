@@ -28,6 +28,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState
 } from "react";
 import { ApiFailure, apiRequest, websocketUrl } from "./api";
@@ -510,6 +511,11 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const copy = translations[language];
+  const copyRef = useRef(copy);
+
+  useEffect(() => {
+    copyRef.current = copy;
+  }, [copy]);
 
   const setLanguage = useCallback((nextLanguage: Language) => {
     localStorage.setItem(LANGUAGE_KEY, nextLanguage);
@@ -540,14 +546,15 @@ export default function App() {
 
   const handleError = useCallback(
     (error: unknown) => {
+      const currentCopy = copyRef.current;
       if (error instanceof ApiFailure && error.status === 401) {
         logout();
-        pushToast(copy.toast.sessionExpired);
+        pushToast(currentCopy.toast.sessionExpired);
         return;
       }
-      pushToast(error instanceof Error ? error.message : copy.toast.actionImpossible);
+      pushToast(error instanceof Error ? error.message : currentCopy.toast.actionImpossible);
     },
-    [copy, logout, pushToast]
+    [logout, pushToast]
   );
 
   const refreshAll = useCallback(async () => {
@@ -591,8 +598,8 @@ export default function App() {
     if (!shareCode) return;
     apiRequest<Bet>(`/api/bets/share/${shareCode}`)
       .then(setSharedBet)
-      .catch(() => pushToast(copy.toast.missingSharedBet));
-  }, [copy, pushToast, shareCode]);
+      .catch(() => pushToast(copyRef.current.toast.missingSharedBet));
+  }, [pushToast, shareCode]);
 
   useEffect(() => {
     if (!token || !user) return;
@@ -609,9 +616,9 @@ export default function App() {
         }
       }
     };
-    socket.onerror = () => pushToast(copy.toast.realtimeUnavailable);
+    socket.onerror = () => pushToast(copyRef.current.toast.realtimeUnavailable);
     return () => socket.close();
-  }, [copy, handleError, pushToast, refreshAll, shareCode, token, user]);
+  }, [handleError, pushToast, refreshAll, shareCode, token, user]);
 
   const onAuthenticated = (response: AuthResponse) => {
     localStorage.setItem(TOKEN_KEY, response.token);
