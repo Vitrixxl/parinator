@@ -10,7 +10,22 @@ Note de test: modification README pour vérifier le push.
 docker compose up --build
 ```
 
-L'application complète écoute sur `http://127.0.0.1:8080`. La base SQLite est persistée dans le volume Docker `parinator-data`.
+L'application complète écoute sur `http://127.0.0.1:8080`. La base SQLite est persistée via bind mount dans `./data/parinator.db`, donc elle reste accessible directement depuis le serveur hôte.
+
+Si le conteneur doit écrire avec un autre utilisateur que `1000:1000`, définis `UID` et `GID` dans un fichier `.env` à la racine avant de lancer Compose:
+
+```bash
+printf "UID=%s\nGID=%s\n" "$(id -u)" "$(id -g)" >> .env
+```
+
+Pour migrer une base existante depuis l'ancien volume Docker nommé:
+
+```bash
+docker compose stop parinator
+OLD_VOLUME="$(docker volume ls --format '{{.Name}}' | grep 'parinator-data$' | head -n1)"
+docker run --rm -v "$OLD_VOLUME:/from:ro" -v "$PWD/data:/to" alpine sh -c 'cp -a /from/. /to/'
+docker compose up --build -d --force-recreate
+```
 
 En production, fournis un secret explicite:
 

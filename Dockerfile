@@ -35,7 +35,6 @@ ENV STATIC_DIR=/app/public
 ENV DATABASE_URL=sqlite:///data/parinator.db
 
 EXPOSE 8080
-VOLUME ["/data"]
 
 USER parinator
 CMD ["parinator-api"]
