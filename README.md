@@ -2,6 +2,8 @@
 
 Application de paris amicaux sans argent réel.
 
+Note de test: modification README pour vérifier le push.
+
 ## Docker
 
 ```bash
