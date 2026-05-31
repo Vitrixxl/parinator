@@ -755,8 +755,8 @@ function TopBar({ user, onLogout }: { user: User; onLogout: () => void }) {
     <header className="sticky top-0 z-30 backdrop-blur-xl bg-canvas/70 border-b border-edge/70">
       <div className="mx-auto max-w-[1080px] px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="relative w-9 h-9 rounded-md bg-lime grid place-items-center shrink-0 shadow-[0_2px_0_var(--color-lime-deep)]">
-            <Swords className="w-4 h-4 text-[#0f2d1b]" strokeWidth={2.5} />
+          <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-lime to-iris grid place-items-center shrink-0 shadow-[0_4px_12px_-4px_var(--color-iris-deep)]">
+            <Swords className="w-4 h-4 text-[#241a52]" strokeWidth={2.25} />
           </div>
           <div className="min-w-0">
             <div className="flex items-baseline gap-2">
@@ -845,11 +845,11 @@ function TabBar({
               key={tab.id}
               type="button"
               onClick={() => setView(tab.id)}
-              style={active ? { color: "#0f2d1b", backgroundColor: "#5cbf83" } : undefined}
+              style={active ? { color: "#241a52", backgroundColor: "#9a8bf2" } : undefined}
               className={cn(
                 "relative flex-1 sm:flex-none sm:min-w-[100px] h-12 px-3 sm:px-5 rounded-xl flex items-center justify-center gap-2 font-display uppercase tracking-[0.06em] text-xs transition-all",
                 active
-                  ? "font-bold shadow-[0_2px_0_var(--color-lime-deep)]"
+                  ? "font-bold shadow-[0_2px_0_var(--color-iris-deep),0_8px_18px_-8px_var(--color-iris-deep)]"
                   : "text-ink-dim hover:text-ink hover:bg-surface-strong"
               )}
             >
@@ -859,7 +859,7 @@ function TabBar({
                 <span
                   style={
                     active
-                      ? { color: "#0f2d1b", backgroundColor: "rgba(15,45,27,0.15)" }
+                      ? { color: "#241a52", backgroundColor: "rgba(36,26,82,0.14)" }
                       : undefined
                   }
                   className={cn(
@@ -871,7 +871,7 @@ function TabBar({
                 </span>
               )}
               {active && (
-                <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-lime shadow-[0_0_8px_var(--color-lime)]" />
+                <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-iris shadow-[0_0_8px_var(--color-iris)]" />
               )}
             </button>
           );
@@ -1019,8 +1019,8 @@ function AuthScreen({
       {/* HERO — desktop only */}
       <section className="hidden lg:flex relative flex-col justify-between p-12 overflow-hidden">
         <div className="flex items-center gap-3 rise" style={{ animationDelay: "60ms" }}>
-          <div className="w-10 h-10 rounded-md bg-lime grid place-items-center shadow-[0_2px_0_var(--color-lime-deep)]">
-            <Swords className="w-5 h-5 text-[#0f2d1b]" strokeWidth={2.5} />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lime to-iris grid place-items-center shadow-[0_5px_14px_-4px_var(--color-iris-deep)]">
+            <Swords className="w-5 h-5 text-[#241a52]" strokeWidth={2.25} />
           </div>
           <div>
             <p className="font-display text-2xl uppercase tracking-tight leading-none">Parinator</p>
@@ -1051,8 +1051,8 @@ function AuthScreen({
       <section className="lg:hidden px-5 pt-6 pb-3 rise" style={{ animationDelay: "60ms" }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-md bg-lime grid place-items-center shadow-[0_2px_0_var(--color-lime-deep)]">
-              <Swords className="w-4 h-4 text-[#0f2d1b]" strokeWidth={2.5} />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-lime to-iris grid place-items-center shadow-[0_4px_12px_-4px_var(--color-iris-deep)]">
+              <Swords className="w-4 h-4 text-[#241a52]" strokeWidth={2.25} />
             </div>
             <p className="font-display text-xl uppercase tracking-tight leading-none">Parinator</p>
           </div>
@@ -1691,14 +1691,14 @@ function ParticipantChip({
   if (participant.status === "declined")
     chipClass = "border-rose/40 bg-rose/10 text-rose line-through";
   if (isWinner)
-    chipClass = "border-lime-deep bg-lime text-[#0f2d1b] font-bold";
+    chipClass = "border-lime-deep bg-lime text-[#16432f] font-bold";
 
   return (
     <span className={cn("chip", chipClass)}>
       <span
         className={cn(
           "chip-avatar",
-          isWinner ? "bg-[#0f2d1b]/15 text-[#0f2d1b]" : "bg-ticket-ink/10 text-ticket-ink"
+          isWinner ? "bg-[#16432f]/15 text-[#16432f]" : "bg-ticket-ink/10 text-ticket-ink"
         )}
       >
         {initials(participant.username)}
@@ -2023,20 +2023,20 @@ function CreateBetView({
                     onClick={() => toggleInvite(friend.id)}
                     style={
                       checked
-                        ? { backgroundColor: "#5cbf83", color: "#0f2d1b" }
+                        ? { backgroundColor: "#9a8bf2", color: "#241a52" }
                         : undefined
                     }
                     className={cn(
                       "flex items-center gap-2 p-2 rounded-xl border-2 transition-colors text-left",
                       checked
-                        ? "border-lime-deep font-bold shadow-[0_2px_0_var(--color-lime-deep)]"
+                        ? "border-iris-deep font-bold shadow-[0_2px_0_var(--color-iris-deep)]"
                         : "border-edge bg-surface hover:border-edge-strong"
                     )}
                   >
                     <span
                       className={cn(
                         "w-7 h-7 rounded-full grid place-items-center font-display text-xs shrink-0",
-                        checked ? "bg-[#0f2d1b]/15 text-[#0f2d1b]" : "bg-surface-strong text-ink-dim"
+                        checked ? "bg-[#241a52]/12 text-[#241a52]" : "bg-surface-strong text-ink-dim"
                       )}
                     >
                       {initials(friend.username)}
@@ -2225,8 +2225,8 @@ function FriendsView({
               style={{ animationDelay: `${i * 50}ms` } as React.CSSProperties}
             >
               <div className="relative mx-auto w-14 h-14">
-                <div className="absolute inset-0 rounded-full bg-lime/20 blur-md" />
-                <div className="relative w-14 h-14 rounded-full bg-lime grid place-items-center font-display text-xl text-[#0f2d1b]">
+                <div className="absolute inset-0 rounded-full bg-iris/25 blur-md" />
+                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-lime to-iris grid place-items-center font-display text-xl text-[#241a52]">
                   {initials(friend.username)}
                 </div>
               </div>

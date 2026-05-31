@@ -4,16 +4,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap font-display uppercase tracking-[0.06em] rounded-xl transition-all disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lime focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:translate-y-[1px] select-none",
+  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap font-display uppercase tracking-[0.06em] rounded-xl transition-all disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-iris focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:translate-y-[1px] select-none",
   {
     variants: {
       variant: {
         primary:
-          "bg-lime text-black font-bold hover:bg-lime/90 shadow-[0_3px_0_0_var(--color-lime-deep)] hover:shadow-[0_2px_0_0_var(--color-lime-deep)] active:shadow-[0_1px_0_0_var(--color-lime-deep)]",
+          "bg-iris text-[#241a52] font-bold hover:bg-iris/90 shadow-[0_2px_0_0_var(--color-iris-deep),0_10px_22px_-12px_var(--color-iris-deep)] hover:shadow-[0_2px_0_0_var(--color-iris-deep),0_14px_26px_-12px_var(--color-iris-deep)] active:shadow-[0_1px_0_0_var(--color-iris-deep)]",
         ember:
-          "bg-ember text-black font-bold hover:bg-ember/90 shadow-[0_3px_0_0_var(--color-ember-deep)] active:shadow-[0_1px_0_0_var(--color-ember-deep)]",
+          "bg-ember text-white font-bold hover:bg-ember/90 shadow-[0_2px_0_0_var(--color-ember-deep),0_10px_22px_-12px_var(--color-ember-deep)] active:shadow-[0_1px_0_0_var(--color-ember-deep)]",
         ink:
-          "bg-ticket-ink text-white hover:bg-ticket-ink/90 shadow-[0_3px_0_0_rgba(0,0,0,0.5)] active:shadow-[0_1px_0_0_rgba(0,0,0,0.5)]",
+          "bg-ticket-ink text-white hover:bg-ticket-ink/90 shadow-[0_2px_0_0_rgba(59,52,80,0.45),0_10px_22px_-12px_rgba(59,52,80,0.55)] active:shadow-[0_1px_0_0_rgba(59,52,80,0.45)]",
         ghost:
           "bg-transparent text-ink border border-edge hover:bg-surface hover:border-edge-strong",
         ghostInk:
@@ -45,9 +45,9 @@ export interface ButtonProps
 }
 
 const variantInlineStyle: Partial<Record<NonNullable<ButtonProps["variant"]>, React.CSSProperties>> = {
-  primary: { color: "#0f2d1b", backgroundColor: "#5cbf83" },
-  ember: { color: "#3a1c12", backgroundColor: "#f2724c" },
-  ink: { color: "#ffffff", backgroundColor: "#3a2e23" }
+  primary: { color: "#241a52", backgroundColor: "#9a8bf2" },
+  ember: { color: "#5a2a18", backgroundColor: "#ff9f80" },
+  ink: { color: "#ffffff", backgroundColor: "#3b3450" }
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

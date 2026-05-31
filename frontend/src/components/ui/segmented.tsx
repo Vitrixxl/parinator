@@ -46,16 +46,16 @@ export function Segmented<T extends string>({
             style={
               active
                 ? ink
-                  ? { color: "#ffffff", backgroundColor: "#3a2e23" }
-                  : { color: "#0f2d1b", backgroundColor: "#5cbf83" }
+                  ? { color: "#ffffff", backgroundColor: "#3b3450" }
+                  : { color: "#241a52", backgroundColor: "#9a8bf2" }
                 : undefined
             }
             className={cn(
               "relative z-10 h-10 px-3 inline-flex items-center justify-center gap-1.5 font-display uppercase tracking-[0.06em] text-xs transition-colors min-w-0 truncate rounded-xl",
               active
                 ? ink
-                  ? "font-bold shadow-[inset_0_-3px_0_var(--color-lime),0_2px_0_rgba(0,0,0,0.3)]"
-                  : "font-bold shadow-[0_2px_0_var(--color-lime-deep)]"
+                  ? "font-bold shadow-[inset_0_-3px_0_var(--color-iris),0_2px_0_rgba(59,52,80,0.25)]"
+                  : "font-bold shadow-[0_2px_0_var(--color-iris-deep)]"
                 : ink
                   ? "text-ticket-ink-dim hover:text-ticket-ink"
                   : "text-ink-dim hover:text-ink"
