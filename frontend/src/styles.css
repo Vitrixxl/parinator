@@ -161,21 +161,6 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   background: var(--color-canvas);
 }
 
-.palette-rail {
-  position: fixed;
-  inset: 0 0 auto;
-  z-index: 60;
-  height: 8px;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  pointer-events: none;
-}
-.palette-rail span:nth-child(1) { background: var(--color-rose); }
-.palette-rail span:nth-child(2) { background: var(--color-ember); }
-.palette-rail span:nth-child(3) { background: var(--color-lime); }
-.palette-rail span:nth-child(4) { background: var(--color-iris); }
-.palette-rail span:nth-child(5) { background: var(--color-ink); }
-
 .world-grain {
   position: fixed;
   inset: 0;

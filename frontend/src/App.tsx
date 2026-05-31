@@ -839,13 +839,6 @@ export default function App() {
       <div className="world-bg" aria-hidden />
       <div className="world-wordmark" aria-hidden>PARINATOR</div>
       <div className="world-grain" aria-hidden />
-      <div className="palette-rail" aria-hidden>
-        <span />
-        <span />
-        <span />
-        <span />
-        <span />
-      </div>
 
       {loading ? (
         <LoadingScreen />
