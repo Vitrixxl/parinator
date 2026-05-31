@@ -3,76 +3,77 @@
 
 /* ───────────────────────────────────────────────
    PARINATOR
-   Identité : sportsbook nocturne, ticket en papier
+   Identité : soirée entre potes, chaleureuse & douce
+   Palette  : crépuscule cacao · menthe tendre · corail
    Polices  : Anton (display) · Instrument Sans · JetBrains Mono
    ─────────────────────────────────────────────── */
 
 @theme {
-  /* Base canvas — un noir chaud, presque organique */
-  --color-canvas: #0d0e0a;
-  --color-canvas-soft: #14150f;
-  --color-ink: #f2ead8;
-  --color-ink-dim: #8a8675;
-  --color-ink-faint: #4a4738;
+  /* Base canvas — un crépuscule cacao, tiède et cosy */
+  --color-canvas: #24201c;
+  --color-canvas-soft: #2c2723;
+  --color-ink: #f7efe1;
+  --color-ink-dim: #b0a48f;
+  --color-ink-faint: #675d4e;
 
-  /* Surfaces sombres */
-  --color-surface: #161613;
-  --color-surface-strong: #1e1e1a;
-  --color-surface-deep: #0a0b07;
+  /* Surfaces — bois chaud */
+  --color-surface: #2f2925;
+  --color-surface-strong: #3a322c;
+  --color-surface-deep: #1d1916;
 
-  /* Papier ticket — pour les cartes héros */
-  --color-ticket: #f4ecd8;
-  --color-ticket-warm: #ebe1c8;
-  --color-ticket-ink: #14130d;
-  --color-ticket-ink-dim: #5b554a;
-  --color-ticket-edge: #d4c8a8;
+  /* Papier ticket — crème douce */
+  --color-ticket: #f9f1e3;
+  --color-ticket-warm: #f1e7d4;
+  --color-ticket-ink: #33291f;
+  --color-ticket-ink-dim: #7a7060;
+  --color-ticket-edge: #e4d7be;
 
-  /* Accents */
-  --color-lime: #d5f25c;
-  --color-lime-deep: #a8c739;
-  --color-lime-dark: #6b7e26;
-  --color-ember: #ff5a2c;
-  --color-ember-deep: #c93f17;
-  --color-rose: #ff4d6d;
-  --color-jade: #7fe38c;
-  --color-amber: #ffb547;
+  /* Accents — adoucis, amicaux */
+  --color-lime: #9be0a8;
+  --color-lime-deep: #6cc185;
+  --color-lime-dark: #4f9a64;
+  --color-ember: #ff8e72;
+  --color-ember-deep: #ed6a4a;
+  --color-rose: #ff8aa0;
+  --color-jade: #84d6be;
+  --color-amber: #ffcf85;
 
   /* Borders */
-  --color-edge: #2a2a24;
-  --color-edge-strong: #3a3a32;
+  --color-edge: #433a33;
+  --color-edge-strong: #564a41;
 
   /* shadcn semantic — pour les composants ui/* */
-  --color-background: #0d0e0a;
-  --color-foreground: #f2ead8;
-  --color-card: #161613;
-  --color-card-foreground: #f2ead8;
-  --color-popover: #1e1e1a;
-  --color-popover-foreground: #f2ead8;
-  --color-primary: #d5f25c;
-  --color-primary-foreground: #0d0e0a;
-  --color-secondary: #1e1e1a;
-  --color-secondary-foreground: #f2ead8;
-  --color-muted: #1e1e1a;
-  --color-muted-foreground: #8a8675;
-  --color-accent: #ff5a2c;
-  --color-accent-foreground: #0d0e0a;
-  --color-destructive: #ff4d6d;
-  --color-destructive-foreground: #0d0e0a;
-  --color-border: #2a2a24;
-  --color-input: #2a2a24;
-  --color-ring: #d5f25c;
+  --color-background: #24201c;
+  --color-foreground: #f7efe1;
+  --color-card: #2f2925;
+  --color-card-foreground: #f7efe1;
+  --color-popover: #3a322c;
+  --color-popover-foreground: #f7efe1;
+  --color-primary: #9be0a8;
+  --color-primary-foreground: #1f2a1f;
+  --color-secondary: #3a322c;
+  --color-secondary-foreground: #f7efe1;
+  --color-muted: #3a322c;
+  --color-muted-foreground: #b0a48f;
+  --color-accent: #ff8e72;
+  --color-accent-foreground: #3a1c12;
+  --color-destructive: #ff8aa0;
+  --color-destructive-foreground: #24201c;
+  --color-border: #433a33;
+  --color-input: #433a33;
+  --color-ring: #9be0a8;
 
   /* Polices */
   --font-display: "Anton", "Bebas Neue", system-ui, sans-serif;
   --font-sans: "Instrument Sans", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
 
-  /* Rayons */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 22px;
-  --radius-2xl: 28px;
+  /* Rayons — plus ronds, plus doux */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 30px;
 
   /* Animations sur-mesure */
   --animate-shimmer: shimmer 2.4s linear infinite;
@@ -133,8 +134,9 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(60vw 50vh at 12% -10%, rgba(213, 242, 92, 0.07), transparent 60%),
-    radial-gradient(50vw 50vh at 100% 110%, rgba(255, 90, 44, 0.06), transparent 60%),
+    radial-gradient(65vw 55vh at 12% -10%, rgba(155, 224, 168, 0.10), transparent 62%),
+    radial-gradient(55vw 55vh at 100% 110%, rgba(255, 142, 114, 0.09), transparent 62%),
+    radial-gradient(70vw 60vh at 50% 50%, rgba(255, 207, 133, 0.035), transparent 70%),
     linear-gradient(180deg, var(--color-canvas) 0%, var(--color-canvas-soft) 100%);
 }
 
@@ -143,7 +145,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.4;
+  opacity: 0.26;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.45 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
@@ -194,12 +196,12 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   position: relative;
   background: var(--color-ticket);
   color: var(--color-ticket-ink);
-  border-radius: 14px;
+  border-radius: 20px;
   border: 1px solid var(--color-ticket-edge);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 18px 36px -18px rgba(0, 0, 0, 0.5),
-    0 2px 0 rgba(0, 0, 0, 0.35);
+    0 20px 44px -22px rgba(58, 40, 24, 0.45),
+    0 2px 0 rgba(58, 40, 24, 0.16);
   overflow: visible;
 }
 
@@ -222,9 +224,9 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   color: var(--color-ink);
   border-color: var(--color-edge);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.04) inset,
-    0 18px 36px -18px rgba(0, 0, 0, 0.7),
-    0 2px 0 rgba(0, 0, 0, 0.5);
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 20px 44px -22px rgba(0, 0, 0, 0.55),
+    0 2px 0 rgba(0, 0, 0, 0.3);
 }
 .ticket-dark::after { display: none; }
 
@@ -267,7 +269,8 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   line-height: 1;
   padding: 0.4rem 0.7rem 0.35rem;
   border: 1.5px solid currentColor;
-  transform: rotate(-2.5deg);
+  border-radius: 7px;
+  transform: rotate(-1.5deg);
   white-space: nowrap;
   position: relative;
 }
@@ -319,7 +322,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   width: 100%;
   background: rgba(255, 255, 255, 0.55);
   border: 1.5px solid var(--color-ticket-edge);
-  border-radius: 8px;
+  border-radius: 11px;
   color: var(--color-ticket-ink);
   padding: 0.7rem 0.85rem;
   min-height: 44px;
@@ -340,7 +343,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   width: 100%;
   background: var(--color-surface);
   border: 1.5px solid var(--color-edge);
-  border-radius: 8px;
+  border-radius: 11px;
   color: var(--color-ink);
   padding: 0.7rem 0.85rem;
   min-height: 44px;
@@ -351,7 +354,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 .field-dark::placeholder { color: var(--color-ink-dim); opacity: 0.7; }
 .field-dark:focus {
   border-color: var(--color-lime);
-  box-shadow: 0 0 0 3px rgba(213, 242, 92, 0.18);
+  box-shadow: 0 0 0 3px rgba(155, 224, 168, 0.22);
 }
 
 /* ─── Label (au-dessus des champs) ─── */
@@ -424,7 +427,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 /* ─── Bottom tab bar ─── */
 .tabbar-glow {
   background:
-    radial-gradient(60% 80% at 50% 0%, rgba(213, 242, 92, 0.06), transparent),
+    radial-gradient(60% 80% at 50% 0%, rgba(155, 224, 168, 0.08), transparent),
     var(--color-surface);
   backdrop-filter: blur(20px);
 }

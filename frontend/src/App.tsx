@@ -845,7 +845,7 @@ function TabBar({
               key={tab.id}
               type="button"
               onClick={() => setView(tab.id)}
-              style={active ? { color: "#000000", backgroundColor: "#d5f25c" } : undefined}
+              style={active ? { color: "#1f2a1f", backgroundColor: "#9be0a8" } : undefined}
               className={cn(
                 "relative flex-1 sm:flex-none sm:min-w-[100px] h-12 px-3 sm:px-5 rounded-xl flex items-center justify-center gap-2 font-display uppercase tracking-[0.06em] text-xs transition-all",
                 active
@@ -859,7 +859,7 @@ function TabBar({
                 <span
                   style={
                     active
-                      ? { color: "#000000", backgroundColor: "rgba(0,0,0,0.18)" }
+                      ? { color: "#1f2a1f", backgroundColor: "rgba(31,42,31,0.16)" }
                       : undefined
                   }
                   className={cn(
@@ -2023,7 +2023,7 @@ function CreateBetView({
                     onClick={() => toggleInvite(friend.id)}
                     style={
                       checked
-                        ? { backgroundColor: "#d5f25c", color: "#000000" }
+                        ? { backgroundColor: "#9be0a8", color: "#1f2a1f" }
                         : undefined
                     }
                     className={cn(
