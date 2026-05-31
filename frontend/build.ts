@@ -89,9 +89,16 @@ async function buildJs() {
 
 async function buildHtml() {
   const template = await readFile(join(frontendDir, "index.html"), "utf8");
+  const cacheBuster = Date.now().toString(36);
   const html = template
-    .replace('<link rel="stylesheet" href="/src/styles.css" />', '<link rel="stylesheet" href="/assets/app.css" />')
-    .replace('<script type="module" src="/src/main.tsx"></script>', '<script type="module" src="/assets/main.js"></script>');
+    .replace(
+      '<link rel="stylesheet" href="/src/styles.css" />',
+      `<link rel="stylesheet" href="/assets/app.css?v=${cacheBuster}" />`
+    )
+    .replace(
+      '<script type="module" src="/src/main.tsx"></script>',
+      `<script type="module" src="/assets/main.js?v=${cacheBuster}"></script>`
+    );
   await writeFile(join(backendPublicDir, "index.html"), html);
 }
 

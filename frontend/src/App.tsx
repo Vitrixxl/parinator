@@ -382,6 +382,109 @@ type Side = "A" | "B";
 
 const VIEW_ORDER: View[] = ["bets", "create", "friends", "debts"];
 
+type PressableInlineStyle = React.CSSProperties & {
+  "--press-shadow"?: string;
+  "--press-depth"?: string;
+};
+
+const TAB_PALETTE: Record<
+  View,
+  {
+    activeBg: string;
+    activeColor: string;
+    activeBorder: string;
+    inactiveBg: string;
+    inactiveColor: string;
+    inactiveBorder: string;
+    shadow: string;
+  }
+> = {
+  bets: {
+    activeBg: "#cf666d",
+    activeColor: "#ffffff",
+    activeBorder: "#984047",
+    inactiveBg: "rgba(207, 102, 109, 0.18)",
+    inactiveColor: "#84363d",
+    inactiveBorder: "rgba(207, 102, 109, 0.45)",
+    shadow: "#984047"
+  },
+  create: {
+    activeBg: "#4f98a2",
+    activeColor: "#ffffff",
+    activeBorder: "#3f7f89",
+    inactiveBg: "rgba(79, 152, 162, 0.20)",
+    inactiveColor: "#285f68",
+    inactiveBorder: "rgba(79, 152, 162, 0.45)",
+    shadow: "#356f77"
+  },
+  friends: {
+    activeBg: "#e8a49b",
+    activeColor: "#26345c",
+    activeBorder: "#b45c56",
+    inactiveBg: "rgba(232, 164, 155, 0.34)",
+    inactiveColor: "#783f3f",
+    inactiveBorder: "rgba(180, 92, 86, 0.36)",
+    shadow: "#ba746d"
+  },
+  debts: {
+    activeBg: "#26345c",
+    activeColor: "#ffffff",
+    activeBorder: "#17213e",
+    inactiveBg: "rgba(38, 52, 92, 0.12)",
+    inactiveColor: "#26345c",
+    inactiveBorder: "rgba(38, 52, 92, 0.32)",
+    shadow: "#17213e"
+  }
+};
+
+const FRIEND_BUTTON_PALETTE = [
+  {
+    bg: "rgba(207, 102, 109, 0.16)",
+    border: "rgba(207, 102, 109, 0.44)",
+    text: "#84363d",
+    activeBg: "#cf666d",
+    activeText: "#ffffff",
+    activeBorder: "#984047",
+    shadow: "#984047"
+  },
+  {
+    bg: "rgba(232, 164, 155, 0.28)",
+    border: "rgba(180, 92, 86, 0.34)",
+    text: "#783f3f",
+    activeBg: "#e8a49b",
+    activeText: "#26345c",
+    activeBorder: "#b45c56",
+    shadow: "#ba746d"
+  },
+  {
+    bg: "rgba(189, 208, 191, 0.42)",
+    border: "rgba(156, 172, 157, 0.44)",
+    text: "#26345c",
+    activeBg: "#bdd0bf",
+    activeText: "#26345c",
+    activeBorder: "#9cac9d",
+    shadow: "#8da190"
+  },
+  {
+    bg: "rgba(79, 152, 162, 0.18)",
+    border: "rgba(63, 127, 137, 0.36)",
+    text: "#285f68",
+    activeBg: "#4f98a2",
+    activeText: "#ffffff",
+    activeBorder: "#3f7f89",
+    shadow: "#356f77"
+  },
+  {
+    bg: "rgba(38, 52, 92, 0.10)",
+    border: "rgba(38, 52, 92, 0.28)",
+    text: "#26345c",
+    activeBg: "#26345c",
+    activeText: "#ffffff",
+    activeBorder: "#17213e",
+    shadow: "#17213e"
+  }
+];
+
 type User = {
   id: string;
   username: string;
@@ -736,6 +839,13 @@ export default function App() {
       <div className="world-bg" aria-hidden />
       <div className="world-wordmark" aria-hidden>PARINATOR</div>
       <div className="world-grain" aria-hidden />
+      <div className="palette-rail" aria-hidden>
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
 
       {loading ? (
         <LoadingScreen />
@@ -774,7 +884,7 @@ export default function App() {
             </div>
           </main>
 
-          <TabBar view={view} setView={setView} bets={bets} debts={debts} />
+          <TabBar view={view} setView={setView} />
 
           <ToastStack toasts={toasts} />
         </div>
@@ -820,7 +930,7 @@ function LanguageToggle({
           { value: "fr", label: copy.common.french },
           { value: "en", label: copy.common.english }
         ]}
-        className="w-[108px]"
+        className="w-[132px]"
       />
     </div>
   );
@@ -834,10 +944,10 @@ function TopBar({ user, onLogout }: { user: User; onLogout: () => void }) {
   const copy = useCopy();
   return (
     <header className="sticky top-0 z-30 backdrop-blur-xl bg-canvas/70 border-b border-edge/70">
-      <div className="mx-auto max-w-[1080px] px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="mx-auto max-w-[1080px] px-5 sm:px-8 h-[72px] flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-lime to-iris grid place-items-center shrink-0 shadow-[0_4px_12px_-4px_var(--color-iris-deep)]">
-            <Swords className="w-4 h-4 text-[#241a52]" strokeWidth={2.25} />
+          <div className="relative w-10 h-10 rounded-lg bg-rose border border-rose/45 grid place-items-center shrink-0 shadow-[3px_3px_0_rgba(152,64,71,0.22)]">
+            <Swords className="w-4 h-4 text-white" strokeWidth={2.25} />
           </div>
           <div className="min-w-0">
             <div className="flex items-baseline gap-2">
@@ -849,21 +959,21 @@ function TopBar({ user, onLogout }: { user: User; onLogout: () => void }) {
               </span>
             </div>
             <p className="font-mono text-[10px] tracking-[0.18em] text-ink-dim uppercase truncate">
-              <span className="text-lime-deep">●</span> {copy.common.online} · {user.username}
+              <span className="text-iris">●</span> {copy.common.online} · {user.username}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <div className="hidden sm:flex items-center gap-3 pr-3 border-r border-edge/60">
-            <div className="w-9 h-9 rounded-full bg-lime/15 border border-lime/30 grid place-items-center font-display text-sm text-lime-dark">
+            <div className="w-10 h-10 rounded-lg bg-lime/50 border border-lime-deep/45 grid place-items-center font-display text-sm text-ink">
               {initials(user.username)}
             </div>
             <div className="text-right">
               <p className="font-mono text-[10px] tracking-[0.18em] text-ink-dim uppercase">
                 {copy.common.member}
               </p>
-              <p className="font-display text-sm uppercase tracking-wide">{user.username}</p>
+              <p className="font-display text-sm uppercase tracking-normal">{user.username}</p>
             </div>
           </div>
           <LanguageToggle className="shrink-0" />
@@ -888,72 +998,58 @@ function TopBar({ user, onLogout }: { user: User; onLogout: () => void }) {
 
 function TabBar({
   view,
-  setView,
-  bets,
-  debts
+  setView
 }: {
   view: View;
   setView: (v: View) => void;
-  bets: BetsResponse;
-  debts: DebtsResponse;
 }) {
   const copy = useCopy();
-  const counts: Record<View, number | undefined> = {
-    bets: bets.mine.length + bets.friends.length || undefined,
-    create: undefined,
-    friends: undefined,
-    debts: debts.iOwe.length + debts.owedToMe.length || undefined
-  };
-
   const tabs: { id: View; icon: ReactNode; label: string }[] = [
-    { id: "bets", icon: <TicketIcon className="w-4 h-4" />, label: copy.nav.bets },
-    { id: "create", icon: <Plus className="w-4 h-4" />, label: copy.nav.create },
-    { id: "friends", icon: <Users className="w-4 h-4" />, label: copy.nav.friends },
-    { id: "debts", icon: <Coins className="w-4 h-4" />, label: copy.nav.debts }
+    { id: "bets", icon: <TicketIcon className="w-5 h-5" />, label: copy.nav.bets },
+    { id: "create", icon: <Plus className="w-5 h-5" />, label: copy.nav.create },
+    { id: "friends", icon: <Users className="w-5 h-5" />, label: copy.nav.friends },
+    { id: "debts", icon: <Coins className="w-5 h-5" />, label: copy.nav.debts }
   ];
 
   return (
     <nav
       aria-label={copy.nav.aria}
-      className="fixed sm:bottom-6 bottom-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.2rem)] sm:w-auto safe-bottom"
+      className="fixed sm:bottom-6 bottom-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] sm:w-auto safe-bottom"
     >
-      <div className="tabbar-glow flex items-center gap-1 p-1.5 rounded-2xl border border-edge-strong shadow-[0_20px_44px_-16px_rgba(58,40,24,0.30)]">
+      <div className="flex w-full sm:w-auto items-center gap-3">
         {tabs.map((tab) => {
           const active = view === tab.id;
-          const count = counts[tab.id];
+          const palette = TAB_PALETTE[tab.id];
           return (
             <button
               key={tab.id}
               type="button"
+              aria-label={tab.label}
+              title={tab.label}
               onClick={() => setView(tab.id)}
-              style={active ? { color: "#241a52", backgroundColor: "#9a8bf2" } : undefined}
-              className={cn(
-                "relative flex-1 sm:flex-none sm:min-w-[100px] h-12 px-3 sm:px-5 rounded-xl flex items-center justify-center gap-2 font-display uppercase tracking-[0.06em] text-xs transition-all",
+              style={
                 active
-                  ? "font-bold shadow-[0_2px_0_var(--color-iris-deep),0_8px_18px_-8px_var(--color-iris-deep)]"
-                  : "text-ink-dim hover:text-ink hover:bg-surface-strong"
+                  ? ({
+                      color: palette.activeColor,
+                      backgroundColor: palette.activeBg,
+                      borderColor: palette.activeBorder,
+                      "--press-shadow": palette.shadow,
+                      "--press-depth": "2px"
+                    } as PressableInlineStyle)
+                  : ({
+                      color: palette.inactiveColor,
+                      backgroundColor: palette.inactiveBg,
+                      borderColor: palette.inactiveBorder,
+                      "--press-shadow": "rgba(38, 52, 92, 0.18)",
+                      "--press-depth": "2px"
+                    } as PressableInlineStyle)
+              }
+              className={cn(
+                "pressable relative h-14 flex-1 min-w-0 sm:flex-none sm:h-[58px] sm:w-[58px] rounded-xl border flex items-center justify-center transition-colors hover:brightness-[0.98]"
               )}
             >
               {tab.icon}
-              <span>{tab.label}</span>
-              {typeof count === "number" && (
-                <span
-                  style={
-                    active
-                      ? { color: "#241a52", backgroundColor: "rgba(36,26,82,0.14)" }
-                      : undefined
-                  }
-                  className={cn(
-                    "font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-md",
-                    !active && "bg-surface text-ink-dim"
-                  )}
-                >
-                  {count}
-                </span>
-              )}
-              {active && (
-                <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-iris shadow-[0_0_8px_var(--color-iris)]" />
-              )}
+              <span className="sr-only">{tab.label}</span>
             </button>
           );
         })}
@@ -977,8 +1073,8 @@ function ToastStack({ toasts }: { toasts: Toast[] }) {
           key={toast.id}
           className="ticket ticket-dark p-3 pl-4 flex items-center gap-3 pop"
         >
-          <span className="w-8 h-8 rounded-full bg-lime/15 border border-lime/40 grid place-items-center shrink-0">
-            <Bell className="w-3.5 h-3.5 text-lime-dark" />
+          <span className="w-9 h-9 rounded-lg bg-ember/30 border border-ember-deep/30 grid place-items-center shrink-0">
+            <Bell className="w-3.5 h-3.5 text-ember-deep" />
           </span>
           <p className="text-sm leading-snug">{toast.message}</p>
         </div>
@@ -1031,7 +1127,7 @@ function AuthScreen({
   };
 
   const formFields = (
-    <form onSubmit={submit} className="space-y-3">
+    <form onSubmit={submit} className="space-y-4">
       {mode === "register" ? (
         <>
           <div>
@@ -1083,7 +1179,7 @@ function AuthScreen({
       </div>
 
       {error && (
-        <div className="bg-rose/10 border border-rose/40 rounded-md px-3 py-2 text-rose text-sm font-mono">
+        <div className="bg-rose/10 border border-rose/40 rounded-xl px-4 py-3 text-rose text-sm font-mono">
           {error}
         </div>
       )}
@@ -1100,8 +1196,8 @@ function AuthScreen({
       {/* HERO — desktop only */}
       <section className="hidden lg:flex relative flex-col justify-between p-12 overflow-hidden">
         <div className="flex items-center gap-3 rise" style={{ animationDelay: "60ms" }}>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lime to-iris grid place-items-center shadow-[0_5px_14px_-4px_var(--color-iris-deep)]">
-            <Swords className="w-5 h-5 text-[#241a52]" strokeWidth={2.25} />
+          <div className="w-11 h-11 rounded-lg bg-rose border border-rose/45 grid place-items-center shadow-[3px_3px_0_rgba(152,64,71,0.22)]">
+            <Swords className="w-5 h-5 text-white" strokeWidth={2.25} />
           </div>
           <div>
             <p className="font-display text-2xl uppercase tracking-tight leading-none">Parinator</p>
@@ -1113,7 +1209,7 @@ function AuthScreen({
           <p className="eyebrow mb-4">{copy.auth.manifest}</p>
           <h2 className="font-display uppercase tracking-tight leading-[0.92] text-[clamp(2.6rem,7vw,5.5rem)]">
             {copy.auth.heroLine1}<br />
-            <span className="text-lime-dark">{copy.auth.heroLine2}</span>
+            <span className="text-iris-dark">{copy.auth.heroLine2}</span>
           </h2>
           <p className="mt-6 text-ink-dim text-lg max-w-md leading-relaxed">
             {copy.auth.heroDescription}
@@ -1132,8 +1228,8 @@ function AuthScreen({
       <section className="lg:hidden px-5 pt-6 pb-3 rise" style={{ animationDelay: "60ms" }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-lime to-iris grid place-items-center shadow-[0_4px_12px_-4px_var(--color-iris-deep)]">
-              <Swords className="w-4 h-4 text-[#241a52]" strokeWidth={2.25} />
+            <div className="w-10 h-10 rounded-lg bg-rose border border-rose/45 grid place-items-center shadow-[3px_3px_0_rgba(152,64,71,0.22)]">
+              <Swords className="w-4 h-4 text-white" strokeWidth={2.25} />
             </div>
             <p className="font-display text-xl uppercase tracking-tight leading-none">Parinator</p>
           </div>
@@ -1155,15 +1251,15 @@ function AuthScreen({
             <p className="eyebrow mb-2">{copy.auth.manifest}</p>
             <h1 className="font-display uppercase tracking-tight leading-[0.95] text-4xl">
               {copy.auth.heroLine1}<br />
-              <span className="text-lime-dark">{copy.auth.heroLine2Mobile}</span>
+              <span className="text-iris-dark">{copy.auth.heroLine2Mobile}</span>
             </h1>
           </div>
 
           {sharedBet && (
-            <div className="mb-4 flex items-center gap-3 p-3 rounded-lg border border-lime/30 bg-lime/[0.06]">
-              <Sparkles className="w-4 h-4 text-lime-dark shrink-0" />
+            <div className="mb-5 flex items-center gap-3 p-4 rounded-xl border border-lime-deep/35 bg-lime/35">
+              <Sparkles className="w-4 h-4 text-iris-dark shrink-0" />
               <div className="min-w-0">
-                <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-lime-dark">
+                <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-iris-dark">
                   {copy.common.ticket} {ticketNumber(sharedBet.shareCode)}
                 </p>
                 <p className="font-display text-sm uppercase tracking-tight truncate">
@@ -1219,20 +1315,39 @@ function AuthScreen({
 function FeatureRow() {
   const copy = useCopy();
   const items = [
-    { icon: <TicketIcon className="w-3 h-3" />, label: copy.features.ticket },
-    { icon: <Flame className="w-3 h-3" />, label: copy.features.liveOdds },
-    { icon: <Trophy className="w-3 h-3" />, label: copy.features.winner },
-    { icon: <HandCoins className="w-3 h-3" />, label: copy.features.debts }
+    {
+      icon: <TicketIcon className="w-3 h-3" />,
+      label: copy.features.ticket,
+      className: "bg-rose/15 border-rose/35 text-rose"
+    },
+    {
+      icon: <Flame className="w-3 h-3" />,
+      label: copy.features.liveOdds,
+      className: "bg-ember/30 border-ember-deep/30 text-ember-deep"
+    },
+    {
+      icon: <Trophy className="w-3 h-3" />,
+      label: copy.features.winner,
+      className: "bg-lime/50 border-lime-deep/40 text-lime-dark"
+    },
+    {
+      icon: <HandCoins className="w-3 h-3" />,
+      label: copy.features.debts,
+      className: "bg-iris/20 border-iris/40 text-iris-dark"
+    }
   ];
   return (
-    <div className="mt-8 inline-flex items-center gap-0 rounded-full border border-edge bg-surface/40 backdrop-blur p-1">
-      {items.map((item, i) => (
-        <span key={item.label} className="flex items-center">
-          {i > 0 && <span className="w-px h-4 bg-edge mx-1" />}
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-ink-dim font-mono text-[10px] tracking-[0.16em] uppercase">
-            <span className="text-lime-dark">{item.icon}</span>
-            {item.label}
-          </span>
+    <div className="mt-8 inline-flex flex-wrap items-center gap-2 rounded-xl border border-edge bg-surface/45 backdrop-blur p-2">
+      {items.map((item) => (
+        <span
+          key={item.label}
+          className={cn(
+            "inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border font-mono text-[10px] tracking-[0.16em] uppercase",
+            item.className
+          )}
+        >
+          {item.icon}
+          {item.label}
         </span>
       ))}
     </div>
@@ -1380,8 +1495,8 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="space-y-4">
-      <header className="flex items-end justify-between gap-3 pb-2 border-b border-edge/60">
+    <section className="space-y-5">
+      <header className="flex items-end justify-between gap-3 pb-3 border-b border-edge/60">
         <div>
           <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-ink-dim">
             {eyebrow}
@@ -1391,17 +1506,19 @@ function Section({
               {title}
             </h2>
             {typeof count === "number" && (
-              <span className="font-mono text-base text-ink-dim tabular">[{String(count).padStart(2, "0")}]</span>
+              <span className="inline-flex items-center rounded-lg border border-rose/30 bg-rose/10 px-2.5 py-1 font-mono text-sm text-rose tabular">
+                [{String(count).padStart(2, "0")}]
+              </span>
             )}
           </div>
         </div>
-        <span className="hidden sm:inline-flex items-center gap-2 text-ink-dim">
+        <span className="hidden sm:inline-flex h-11 w-11 items-center justify-center rounded-xl border border-ember-deep/30 bg-ember/30 text-ember-deep">
           {icon}
         </span>
       </header>
 
       {empty ? (
-        <div className="ticket ticket-dark p-8 text-center">
+        <div className="ticket ticket-dark p-10 text-center">
           <p className="font-mono text-xs tracking-[0.18em] uppercase text-ink-dim">{empty}</p>
         </div>
       ) : (
@@ -1464,7 +1581,7 @@ function SharedBetCard({
             {bet.title}
           </h2>
         </div>
-        <Badge tone="lime" align="flat" className="!text-ticket-ink !bg-lime">
+        <Badge tone="lime" align="flat">
           № {ticketNumber(bet.shareCode)}
         </Badge>
       </div>
@@ -1634,7 +1751,7 @@ function BetCard({
           <button
             type="button"
             onClick={copyShare}
-            className="w-11 h-11 rounded-xl border border-ticket-edge hover:bg-ticket-ink/5 grid place-items-center text-ticket-ink"
+            className="w-12 h-12 rounded-xl border border-lime-deep/40 bg-lime/40 hover:bg-lime/55 grid place-items-center text-ticket-ink transition-colors"
             aria-label={copy.common.share}
             title={copy.common.share}
           >
@@ -1670,7 +1787,7 @@ function BetCard({
 
       {/* INVITATION */}
       {isInvitation && (
-        <div className="mt-5 rounded-xl border border-ticket-ink/15 bg-ticket-ink/[0.04] p-4 space-y-3">
+        <div className="mt-5 rounded-xl border border-ember-deep/30 bg-ember/25 p-5 space-y-3">
           <p className="eyebrow-ink flex items-center gap-1.5">
             <Bell className="w-3 h-3" />
             {copy.bets.invitePrompt}
@@ -1731,7 +1848,7 @@ function BetCard({
               </Button>
             </div>
           )}
-          <div className="rounded-xl border border-dashed border-ticket-ink/25 p-3">
+          <div className="rounded-xl border border-dashed border-lime-deep/45 bg-lime/25 p-4">
             <p className="eyebrow-ink mb-2 flex items-center gap-1.5">
               <Crown className="w-3 h-3" />
               {copy.bets.winnerPrompt}
@@ -1772,14 +1889,14 @@ function ParticipantChip({
   if (participant.status === "declined")
     chipClass = "border-rose/40 bg-rose/10 text-rose line-through";
   if (isWinner)
-    chipClass = "border-lime-deep bg-lime text-[#16432f] font-bold";
+    chipClass = "border-iris-deep bg-iris/15 text-ink font-bold";
 
   return (
     <span className={cn("chip", chipClass)}>
       <span
         className={cn(
           "chip-avatar",
-          isWinner ? "bg-[#16432f]/15 text-[#16432f]" : "bg-ticket-ink/10 text-ticket-ink"
+          isWinner ? "bg-ink/10 text-ink" : "bg-ticket-ink/10 text-ticket-ink"
         )}
       >
         {initials(participant.username)}
@@ -1841,10 +1958,12 @@ function SideBox({
   return (
     <div
       className={cn(
-        "relative rounded-xl border-2 p-3 sm:p-4 min-h-[110px] flex flex-col overflow-hidden",
-        active && "border-lime-deep bg-lime/15",
-        loser && "border-ticket-edge bg-ticket-warm/40 opacity-60",
-        !active && !loser && "border-ticket-ink/15 bg-white/30"
+        "relative rounded-xl border-2 p-4 sm:p-5 min-h-[118px] flex flex-col overflow-hidden",
+        active && align === "left" && "border-rose bg-rose/15",
+        active && align === "right" && "border-iris-deep bg-iris/15",
+        loser && "border-ember-deep/25 bg-ember/20 opacity-70",
+        !active && !loser && align === "left" && "border-rose/35 bg-rose/10",
+        !active && !loser && align === "right" && "border-iris/35 bg-iris/10"
       )}
     >
       {/* Decorative corner stamp */}
@@ -1867,7 +1986,7 @@ function SideBox({
             align === "left" ? "right-12 sm:right-14" : "right-2"
           )}
         >
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-ticket-ink text-lime font-mono text-[9px] tracking-[0.2em] uppercase">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-ticket-ink text-white font-mono text-[9px] tracking-[0.2em] uppercase">
             <Crown className="w-2.5 h-2.5" /> {copy.common.win}
           </span>
         </div>
@@ -1989,8 +2108,8 @@ function CreateBetView({
   };
 
   return (
-    <div className="space-y-6">
-      <header className="border-b border-edge/60 pb-3 flex items-end justify-between gap-3">
+    <div className="space-y-7">
+      <header className="border-b border-edge/60 pb-4 flex items-end justify-between gap-3">
         <div>
           <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-ink-dim">
             {copy.create.eyebrow}
@@ -1999,12 +2118,12 @@ function CreateBetView({
             {copy.create.title}
           </h2>
         </div>
-        <span className="hidden sm:inline-flex font-mono text-[10px] tracking-[0.2em] uppercase text-ink-dim border border-edge px-2 py-1 rounded-md">
+        <span className="hidden sm:inline-flex font-mono text-[10px] tracking-[0.2em] uppercase text-rose border border-rose/30 bg-rose/10 px-3 py-1.5 rounded-lg">
           {copy.create.status}
         </span>
       </header>
 
-      <form onSubmit={submit} className="space-y-5">
+      <form onSubmit={submit} className="space-y-6">
         <div>
           <Label htmlFor="title" tone="dark">{copy.create.titleLabel}</Label>
           <Input
@@ -2029,7 +2148,7 @@ function CreateBetView({
           />
         </div>
 
-        <div className="rounded-xl border-2 border-dashed border-edge-strong p-4 sm:p-5 bg-surface/40">
+        <div className="rounded-2xl border-2 border-dashed border-ember-deep/35 p-5 sm:p-6 bg-ember/20">
           <p className="eyebrow mb-3 flex items-center gap-1.5">
             <Swords className="w-3 h-3" />
             {copy.create.duelSetup}
@@ -2094,9 +2213,10 @@ function CreateBetView({
               {copy.create.noFriends}
             </p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {friends.map((friend) => {
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {friends.map((friend, i) => {
                 const checked = invitedUserIds.includes(friend.id);
+                const palette = FRIEND_BUTTON_PALETTE[i % FRIEND_BUTTON_PALETTE.length];
                 return (
                   <button
                     type="button"
@@ -2104,20 +2224,30 @@ function CreateBetView({
                     onClick={() => toggleInvite(friend.id)}
                     style={
                       checked
-                        ? { backgroundColor: "#9a8bf2", color: "#241a52" }
-                        : undefined
+                        ? ({
+                            backgroundColor: palette.activeBg,
+                            borderColor: palette.activeBorder,
+                            color: palette.activeText,
+                            "--press-shadow": palette.shadow,
+                            "--press-depth": "2px"
+                          } as PressableInlineStyle)
+                        : ({
+                            backgroundColor: palette.bg,
+                            borderColor: palette.border,
+                            color: palette.text,
+                            "--press-shadow": "rgba(38, 52, 92, 0.16)",
+                            "--press-depth": "2px"
+                          } as PressableInlineStyle)
                     }
                     className={cn(
-                      "flex items-center gap-2 p-2 rounded-xl border-2 transition-colors text-left",
-                      checked
-                        ? "border-iris-deep font-bold shadow-[0_2px_0_var(--color-iris-deep)]"
-                        : "border-edge bg-surface hover:border-edge-strong"
+                      "pressable flex items-center gap-2.5 p-3 rounded-lg border transition-colors text-left",
+                      checked && "font-bold"
                     )}
                   >
                     <span
                       className={cn(
-                        "w-7 h-7 rounded-full grid place-items-center font-display text-xs shrink-0",
-                        checked ? "bg-[#241a52]/12 text-[#241a52]" : "bg-surface-strong text-ink-dim"
+                        "w-8 h-8 rounded-lg grid place-items-center font-display text-xs shrink-0",
+                        checked ? "bg-white/25" : "bg-white/40"
                       )}
                     >
                       {initials(friend.username)}
@@ -2201,7 +2331,7 @@ function FriendsView({
         title={copy.friends.addTitle}
         icon={<UserPlus className="w-4 h-4" />}
       >
-        <CardDark className="!p-5">
+        <CardDark className="!p-6 !bg-lime/25">
           <form onSubmit={addFriend} className="grid sm:grid-cols-[1fr_auto] gap-3 items-end">
             <div>
               <Label tone="dark">{copy.friends.identifier}</Label>
@@ -2212,7 +2342,7 @@ function FriendsView({
                 placeholder="paulo, marie, contact@..."
               />
             </div>
-            <Button variant="primary" type="submit">
+            <Button variant="ember" type="submit">
               <Send className="w-4 h-4" />
               {copy.friends.send}
             </Button>
@@ -2235,7 +2365,7 @@ function FriendsView({
               style={{ animationDelay: `${i * 60}ms` } as React.CSSProperties}
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-lime/15 border border-lime/30 grid place-items-center font-display text-sm text-lime-dark shrink-0">
+                <div className="w-11 h-11 rounded-lg bg-rose/15 border border-rose/35 grid place-items-center font-display text-sm text-rose shrink-0">
                   {initials(request.user.username)}
                 </div>
                 <div className="min-w-0">
@@ -2271,7 +2401,7 @@ function FriendsView({
           {friends.outgoing.map((request) => (
             <CardDark key={request.id} className="!p-4 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-ink/10 border border-edge grid place-items-center font-display text-sm text-ink-dim shrink-0">
+                <div className="w-11 h-11 rounded-lg bg-ember/30 border border-ember-deep/30 grid place-items-center font-display text-sm text-ember-deep shrink-0">
                   {initials(request.user.username)}
                 </div>
                 <div className="min-w-0">
@@ -2299,15 +2429,23 @@ function FriendsView({
         empty={friends.friends.length === 0 ? copy.friends.rosterEmpty : undefined}
       >
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-          {friends.friends.map((friend, i) => (
+          {friends.friends.map((friend, i) => {
+            const palette = FRIEND_BUTTON_PALETTE[i % FRIEND_BUTTON_PALETTE.length];
+            return (
             <div
               key={friend.id}
               className="ticket ticket-dark !p-4 text-center rise"
               style={{ animationDelay: `${i * 50}ms` } as React.CSSProperties}
             >
               <div className="relative mx-auto w-14 h-14">
-                <div className="absolute inset-0 rounded-full bg-iris/25 blur-md" />
-                <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-lime to-iris grid place-items-center font-display text-xl text-[#241a52]">
+                <div
+                  className="relative w-14 h-14 rounded-xl border grid place-items-center font-display text-xl shadow-[3px_3px_0_rgba(38,52,92,0.18)]"
+                  style={{
+                    backgroundColor: palette.activeBg,
+                    borderColor: palette.activeBorder,
+                    color: palette.activeText
+                  }}
+                >
                   {initials(friend.username)}
                 </div>
               </div>
@@ -2318,7 +2456,8 @@ function FriendsView({
                 {copy.common.member}
               </p>
             </div>
-          ))}
+            );
+          })}
         </div>
       </Section>
     </div>
@@ -2444,8 +2583,24 @@ function ScoreCard({
         : color === "jade"
           ? "text-jade"
           : "text-rose";
+  const cardClass =
+    color === "ember"
+      ? "!bg-ember/20 !border-ember-deep/25"
+      : color === "lime"
+        ? "!bg-lime/35 !border-lime-deep/35"
+        : color === "jade"
+          ? "!bg-iris/15 !border-iris/35"
+          : "!bg-rose/10 !border-rose/30";
+  const iconClass =
+    color === "ember"
+      ? "bg-ember/35 border-ember-deep/30"
+      : color === "lime"
+        ? "bg-lime/55 border-lime-deep/35"
+        : color === "jade"
+          ? "bg-iris/20 border-iris/35"
+          : "bg-rose/15 border-rose/35";
   return (
-    <CardDark className="!p-4 flex items-center justify-between gap-3">
+    <CardDark className={cn("!p-5 flex items-center justify-between gap-3", cardClass)}>
       <div>
         <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-ink-dim">{eyebrow}</p>
         <p className={cn("numframe text-4xl mt-1", colorClass)}>
@@ -2456,7 +2611,7 @@ function ScoreCard({
           </span>
         </p>
       </div>
-      <div className={cn("w-10 h-10 rounded-md grid place-items-center bg-surface-strong", colorClass)}>
+      <div className={cn("w-12 h-12 rounded-xl border grid place-items-center", colorClass, iconClass)}>
         {icon}
       </div>
     </CardDark>
@@ -2476,7 +2631,7 @@ function DebtCard({
 }) {
   const copy = useCopy();
   const settled = debt.status === "settled";
-  const accentColor = mode === "owe" ? "text-ember-deep" : "text-lime-dark";
+  const accentColor = mode === "owe" ? "text-ember-deep" : "text-iris-dark";
 
   return (
     <Card

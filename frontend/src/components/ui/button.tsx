@@ -4,34 +4,36 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "relative inline-flex items-center justify-center gap-2 whitespace-nowrap font-display uppercase tracking-[0.06em] rounded-xl transition-all disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-iris focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:translate-y-[1px] select-none",
+  "pressable inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border font-bold tracking-normal transition-colors disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-iris-deep focus-visible:ring-offset-2 focus-visible:ring-offset-canvas select-none",
   {
     variants: {
       variant: {
         primary:
-          "bg-iris text-[#241a52] font-bold hover:bg-iris/90 shadow-[0_2px_0_0_var(--color-iris-deep),0_10px_22px_-12px_var(--color-iris-deep)] hover:shadow-[0_2px_0_0_var(--color-iris-deep),0_14px_26px_-12px_var(--color-iris-deep)] active:shadow-[0_1px_0_0_var(--color-iris-deep)]",
+          "bg-iris text-primary-foreground border-iris-deep/45 hover:bg-iris-dark",
         ember:
-          "bg-ember text-white font-bold hover:bg-ember/90 shadow-[0_2px_0_0_var(--color-ember-deep),0_10px_22px_-12px_var(--color-ember-deep)] active:shadow-[0_1px_0_0_var(--color-ember-deep)]",
+          "bg-ember text-accent-foreground border-ember-deep/45 hover:bg-ember/90",
+        sage:
+          "bg-lime text-secondary-foreground border-lime-deep/45 hover:bg-lime/90",
         ink:
-          "bg-ticket-ink text-white hover:bg-ticket-ink/90 shadow-[0_2px_0_0_rgba(59,52,80,0.45),0_10px_22px_-12px_rgba(59,52,80,0.55)] active:shadow-[0_1px_0_0_rgba(59,52,80,0.45)]",
+          "bg-ticket-ink text-white border-ticket-ink hover:bg-ticket-ink/90",
         ghost:
-          "bg-transparent text-ink border border-edge hover:bg-surface hover:border-edge-strong",
+          "bg-lime/40 text-ink border-lime-deep/35 hover:bg-lime/55 hover:border-lime-deep/50",
         ghostInk:
-          "bg-transparent text-ticket-ink border border-ticket-edge hover:bg-ticket-ink/5",
+          "bg-ember/25 text-ticket-ink border-ember-deep/30 hover:bg-ember/40",
         danger:
-          "bg-transparent text-rose border border-rose/35 hover:bg-rose/10",
+          "bg-rose text-white border-rose hover:bg-rose/90",
         icon:
-          "bg-surface border border-edge text-ink hover:bg-surface-strong hover:border-edge-strong",
+          "bg-lime/40 border-lime-deep/35 text-ink hover:bg-lime/55 hover:border-lime-deep/50",
         iconInk:
-          "bg-transparent border border-ticket-edge text-ticket-ink hover:bg-ticket-ink/5"
+          "bg-ember/25 border-ember-deep/30 text-ticket-ink hover:bg-ember/40"
       },
       size: {
-        xs: "h-8 px-3 text-[11px]",
-        sm: "h-10 px-4 text-xs",
-        md: "h-11 px-5 text-sm",
-        lg: "h-12 px-6 text-base",
-        icon: "h-11 w-11 px-0",
-        iconSm: "h-9 w-9 px-0"
+        xs: "h-9 px-3.5 text-[11px]",
+        sm: "h-11 px-5 text-xs",
+        md: "h-12 px-6 text-sm",
+        lg: "h-[52px] px-7 text-base",
+        icon: "h-12 w-12 px-0",
+        iconSm: "h-10 w-10 px-0"
       }
     },
     defaultVariants: { variant: "primary", size: "md" }
@@ -44,10 +46,41 @@ export interface ButtonProps
   asChild?: boolean;
 }
 
-const variantInlineStyle: Partial<Record<NonNullable<ButtonProps["variant"]>, React.CSSProperties>> = {
-  primary: { color: "#241a52", backgroundColor: "#9a8bf2" },
-  ember: { color: "#5a2a18", backgroundColor: "#ff9f80" },
-  ink: { color: "#ffffff", backgroundColor: "#3b3450" }
+type PressableStyle = React.CSSProperties & {
+  "--press-shadow"?: string;
+  "--press-depth"?: string;
+};
+
+const variantInlineStyle: Partial<Record<NonNullable<ButtonProps["variant"]>, PressableStyle>> = {
+  primary: {
+    color: "#ffffff",
+    backgroundColor: "#4f98a2",
+    "--press-shadow": "#356f77"
+  },
+  ember: {
+    color: "#26345c",
+    backgroundColor: "#e8a49b",
+    "--press-shadow": "#ba746d"
+  },
+  sage: {
+    color: "#26345c",
+    backgroundColor: "#bdd0bf",
+    "--press-shadow": "#8da190"
+  },
+  ink: {
+    color: "#ffffff",
+    backgroundColor: "#26345c",
+    "--press-shadow": "#17213e"
+  },
+  ghost: { "--press-shadow": "rgba(38, 52, 92, 0.18)", "--press-depth": "2px" },
+  ghostInk: { "--press-shadow": "rgba(38, 52, 92, 0.18)", "--press-depth": "2px" },
+  danger: {
+    color: "#ffffff",
+    backgroundColor: "#cf666d",
+    "--press-shadow": "#984047"
+  },
+  icon: { "--press-shadow": "rgba(38, 52, 92, 0.18)", "--press-depth": "2px" },
+  iconInk: { "--press-shadow": "rgba(38, 52, 92, 0.18)", "--press-depth": "2px" }
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

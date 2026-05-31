@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils";
 const badgeVariants = cva("stamp", {
   variants: {
     tone: {
-      live:    "text-ember-deep bg-ember/12",
-      done:    "text-jade bg-jade/12",
-      pending: "text-amber bg-amber/12",
-      declined:"text-rose bg-rose/12",
+      live:    "text-ember-deep bg-ember/15",
+      done:    "text-jade bg-jade/15",
+      pending: "text-amber bg-amber/15",
+      declined:"text-rose bg-rose/15",
       ink:     "text-ticket-ink bg-ticket-ink/5",
-      lime:    "text-lime-dark bg-lime/15"
+      lime:    "text-lime-dark bg-lime/45"
     },
     align: {
       tilt: "",

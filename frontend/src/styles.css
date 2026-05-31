@@ -3,82 +3,82 @@
 
 /* ───────────────────────────────────────────────
    PARINATOR
-   Identité : soirée entre potes — pastel, tendre & douce
-   Palette  : porcelaine tiède · gelato (menthe · pêche · iris · beurre · blush · aqua)
-   Marque   : menthe ↔ iris · actions iris · victoires menthe
-   Polices  : Anton (display) · Instrument Sans · JetBrains Mono
+   Identité : soirée entre potes — pastel, lisible & douce
+   Palette  : rose · saumon pastel · sauge · bleu pétrole · bleu nuit
+   Marque   : bleu pétrole + sauge, sans dégradés
+   Polices  : Fredoka (display) · Nunito · JetBrains Mono
    ─────────────────────────────────────────────── */
 
 @theme {
-  /* Base — porcelaine tiède, lumineuse, légèrement prune */
-  --color-canvas: #f7f4f1;
-  --color-canvas-soft: #efe9f1;
-  --color-ink: #3b3450;
-  --color-ink-dim: #877f96;
-  --color-ink-faint: #c2bbcd;
+  /* Base — pastel clair avec encre bleu nuit */
+  --color-canvas: #f7f3f0;
+  --color-canvas-soft: #eef3ec;
+  --color-ink: #26345c;
+  --color-ink-dim: #606a83;
+  --color-ink-faint: #b8b5b5;
 
-  /* Surfaces — blanc nacré */
-  --color-surface: #fffdfb;
-  --color-surface-strong: #f3eef4;
+  /* Surfaces — blanc doux */
+  --color-surface: #fffaf7;
+  --color-surface-strong: #efe5df;
   --color-surface-deep: #ffffff;
 
-  /* Papier ticket — blanc pur, doux */
+  /* Papier ticket — blanc net, doux */
   --color-ticket: #ffffff;
-  --color-ticket-warm: #faf6fb;
-  --color-ticket-ink: #3b3450;
-  --color-ticket-ink-dim: #877f96;
-  --color-ticket-edge: #ece5ef;
+  --color-ticket-warm: #f8f1ed;
+  --color-ticket-ink: #26345c;
+  --color-ticket-ink-dim: #606a83;
+  --color-ticket-edge: #ded7d5;
 
-  /* Accents pastel — gelato */
-  --color-lime: #73d6a9;        /* menthe douce — marque & victoire */
-  --color-lime-deep: #46c08c;
-  --color-lime-dark: #2c9b6f;
-  --color-iris: #9a8bf2;        /* lilas — actions */
-  --color-iris-deep: #7d6ae6;
-  --color-iris-dark: #5b48bd;
-  --color-ember: #ff9f80;       /* pêche */
-  --color-ember-deep: #f87a59;
-  --color-rose: #f487a3;        /* blush */
-  --color-jade: #4cc3bf;        /* aqua */
-  --color-amber: #d49636;       /* beurre */
-  --color-sky: #79bdee;         /* ciel */
+  /* Accents — palette fournie */
+  --color-lime: #bdd0bf;        /* sauge de la palette */
+  --color-lime-deep: #9cac9d;
+  --color-lime-dark: #637968;
+  --color-iris: #4f98a2;        /* bleu pétrole */
+  --color-iris-deep: #3f7f89;
+  --color-iris-dark: #285f68;
+  --color-ember: #e8a49b;       /* saumon pastel */
+  --color-ember-deep: #b45c56;
+  --color-rose: #cf666d;        /* rose */
+  --color-jade: #4f98a2;        /* bleu pétrole */
+  --color-amber: #e8a49b;       /* saumon pastel */
+  --color-sky: #4f98a2;
 
   /* Borders */
-  --color-edge: #ece5ef;
-  --color-edge-strong: #dcd1e3;
+  --color-edge: #ded7d5;
+  --color-edge-strong: #c9c4bf;
 
   /* shadcn semantic — pour les composants ui/* */
-  --color-background: #f7f4f1;
-  --color-foreground: #3b3450;
-  --color-card: #fffdfb;
-  --color-card-foreground: #3b3450;
+  --color-background: #f7f3f0;
+  --color-foreground: #26345c;
+  --color-card: #fffaf7;
+  --color-card-foreground: #26345c;
   --color-popover: #ffffff;
-  --color-popover-foreground: #3b3450;
-  --color-primary: #9a8bf2;
-  --color-primary-foreground: #241a52;
-  --color-secondary: #f3eef4;
-  --color-secondary-foreground: #3b3450;
-  --color-muted: #f3eef4;
-  --color-muted-foreground: #877f96;
-  --color-accent: #ff9f80;
-  --color-accent-foreground: #5a2a18;
-  --color-destructive: #f487a3;
+  --color-popover-foreground: #26345c;
+  --color-primary: #4f98a2;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #bdcdbf;
+  --color-secondary-foreground: #26345c;
+  --color-muted: #efe5df;
+  --color-muted-foreground: #606a83;
+  --color-accent: #e8a49b;
+  --color-accent-foreground: #5d2e32;
+  --color-destructive: #cf666d;
   --color-destructive-foreground: #ffffff;
-  --color-border: #ece5ef;
-  --color-input: #ece5ef;
-  --color-ring: #9a8bf2;
+  --color-border: #ded7d5;
+  --color-input: #ded7d5;
+  --color-ring: #3f7f89;
 
   /* Polices */
-  --font-display: "Anton", "Bebas Neue", system-ui, sans-serif;
-  --font-sans: "Instrument Sans", system-ui, -apple-system, sans-serif;
+  --font-display: "Fredoka", "Nunito", system-ui, sans-serif;
+  --font-sans: "Nunito", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
 
-  /* Rayons — ronds, pillowy, doux */
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  /* Rayons — doux, généreux, sans revenir aux pilules */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 18px;
   --radius-xl: 22px;
-  --radius-2xl: 30px;
+  --radius-2xl: 26px;
 
   /* Animations sur-mesure */
   --animate-shimmer: shimmer 2.4s linear infinite;
@@ -106,23 +106,23 @@
 }
 
 @keyframes page-slide-in-from-right {
-  from { opacity: 0.96; transform: translate3d(100%, 0, 0); }
+  from { opacity: 0.96; transform: translate3d(calc(100% + var(--page-motion-gap)), 0, 0); }
   to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 @keyframes page-slide-in-from-left {
-  from { opacity: 0.96; transform: translate3d(-100%, 0, 0); }
+  from { opacity: 0.96; transform: translate3d(calc(-100% - var(--page-motion-gap)), 0, 0); }
   to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 @keyframes page-slide-out-to-left {
   from { opacity: 1; transform: translate3d(0, 0, 0); }
-  to   { opacity: 0.96; transform: translate3d(-100%, 0, 0); }
+  to   { opacity: 0.96; transform: translate3d(calc(-100% - var(--page-motion-gap)), 0, 0); }
 }
 
 @keyframes page-slide-out-to-right {
   from { opacity: 1; transform: translate3d(0, 0, 0); }
-  to   { opacity: 0.96; transform: translate3d(100%, 0, 0); }
+  to   { opacity: 0.96; transform: translate3d(calc(100% + var(--page-motion-gap)), 0, 0); }
 }
 
 /* ─── Reset minimal ─── */
@@ -153,26 +153,35 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   color: #ffffff;
 }
 
-/* ─── Atmosphère globale — nuage gelato multi-pastel ─── */
+/* ─── Atmosphère globale — pastel plat, sans dégradé ─── */
 .world-bg {
   position: fixed;
   inset: 0;
   z-index: -2;
-  background:
-    radial-gradient(58vw 52vh at 8% -8%, rgba(115, 214, 169, 0.20), transparent 60%),
-    radial-gradient(52vw 52vh at 100% 8%, rgba(154, 139, 242, 0.18), transparent 62%),
-    radial-gradient(54vw 54vh at 96% 104%, rgba(255, 159, 128, 0.16), transparent 62%),
-    radial-gradient(50vw 50vh at 0% 100%, rgba(121, 189, 238, 0.14), transparent 64%),
-    radial-gradient(70vw 60vh at 50% 48%, rgba(244, 135, 163, 0.05), transparent 72%),
-    linear-gradient(180deg, var(--color-canvas) 0%, var(--color-canvas-soft) 100%);
+  background: var(--color-canvas);
 }
+
+.palette-rail {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 60;
+  height: 8px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  pointer-events: none;
+}
+.palette-rail span:nth-child(1) { background: var(--color-rose); }
+.palette-rail span:nth-child(2) { background: var(--color-ember); }
+.palette-rail span:nth-child(3) { background: var(--color-lime); }
+.palette-rail span:nth-child(4) { background: var(--color-iris); }
+.palette-rail span:nth-child(5) { background: var(--color-ink); }
 
 .world-grain {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.10;
+  opacity: 0.045;
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.23  0 0 0 0 0.20  0 0 0 0 0.31  0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
@@ -185,15 +194,20 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   place-items: center;
   pointer-events: none;
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: clamp(18rem, 32vw, 42rem);
-  letter-spacing: -0.03em;
-  color: rgba(59, 52, 80, 0.030);
+  letter-spacing: 0;
+  color: rgba(38, 52, 92, 0.028);
   white-space: nowrap;
   user-select: none;
 }
 
 /* ─── Typo helpers ─── */
-.font-display { font-family: var(--font-display); }
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 650;
+  letter-spacing: 0;
+}
 .font-mono    { font-family: var(--font-mono); }
 .tabular      { font-variant-numeric: tabular-nums; }
 
@@ -223,12 +237,12 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   position: relative;
   background: var(--color-ticket);
   color: var(--color-ticket-ink);
-  border-radius: 26px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--color-ticket-edge);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.8) inset,
-    0 24px 48px -28px rgba(59, 52, 80, 0.20),
-    0 2px 0 rgba(59, 52, 80, 0.04);
+    0 22px 44px -30px rgba(38, 52, 92, 0.24),
+    0 2px 0 rgba(38, 52, 92, 0.04);
   overflow: visible;
 }
 
@@ -252,35 +266,21 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   border-color: var(--color-edge);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.8) inset,
-    0 24px 48px -30px rgba(59, 52, 80, 0.18),
-    0 2px 0 rgba(59, 52, 80, 0.03);
+    0 22px 44px -32px rgba(38, 52, 92, 0.20),
+    0 2px 0 rgba(38, 52, 92, 0.03);
 }
 .ticket-dark::after { display: none; }
 
 /* Perforation horizontale — séparateur signature (pointillé propre, sans notches) */
 .perforation {
   position: relative;
-  height: 1px;
-  background-image: linear-gradient(
-    to right,
-    rgba(20, 19, 13, 0.32) 0,
-    rgba(20, 19, 13, 0.32) 6px,
-    transparent 6px,
-    transparent 12px
-  );
-  background-size: 12px 1px;
-  background-repeat: repeat-x;
+  height: 0;
+  border-top: 1px dashed rgba(38, 52, 92, 0.28);
 }
 
 /* Variante perforation sur cartes ticket-dark (surface claire) */
 .perforation-dark {
-  background-image: linear-gradient(
-    to right,
-    rgba(58, 46, 35, 0.26) 0,
-    rgba(58, 46, 35, 0.26) 6px,
-    transparent 6px,
-    transparent 12px
-  );
+  border-top-color: rgba(38, 52, 92, 0.22);
 }
 
 /* ─── Stamp (status pill) ─── */
@@ -289,8 +289,8 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   align-items: center;
   gap: 0.4rem;
   font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: 0.1em;
+  font-weight: 650;
+  letter-spacing: 0;
   text-transform: uppercase;
   font-size: 0.7rem;
   line-height: 1;
@@ -349,10 +349,10 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   width: 100%;
   background: rgba(255, 255, 255, 0.55);
   border: 1.5px solid var(--color-ticket-edge);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   color: var(--color-ticket-ink);
-  padding: 0.7rem 0.85rem;
-  min-height: 44px;
+  padding: 0.85rem 1rem;
+  min-height: 48px;
   font-family: var(--font-sans);
   font-size: 0.95rem;
   outline: none;
@@ -361,7 +361,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 .field::placeholder { color: var(--color-ticket-ink-dim); opacity: 0.65; }
 .field:focus {
   border-color: var(--color-iris);
-  box-shadow: 0 0 0 3px rgba(154, 139, 242, 0.18);
+  box-shadow: 0 0 0 3px rgba(79, 152, 162, 0.18);
 }
 .field.field-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
@@ -370,10 +370,10 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   width: 100%;
   background: var(--color-surface);
   border: 1.5px solid var(--color-edge);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   color: var(--color-ink);
-  padding: 0.7rem 0.85rem;
-  min-height: 44px;
+  padding: 0.85rem 1rem;
+  min-height: 48px;
   font-size: 0.95rem;
   outline: none;
   transition: border-color 180ms, box-shadow 180ms;
@@ -381,7 +381,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 .field-dark::placeholder { color: var(--color-ink-dim); opacity: 0.7; }
 .field-dark:focus {
   border-color: var(--color-iris);
-  box-shadow: 0 0 0 3px rgba(154, 139, 242, 0.20);
+  box-shadow: 0 0 0 3px rgba(79, 152, 162, 0.20);
 }
 
 /* ─── Label (au-dessus des champs) ─── */
@@ -407,8 +407,9 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 /* ─── Big number frame (odds, mises, points) ─── */
 .numframe {
   font-family: var(--font-display);
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   line-height: 0.95;
 }
 
@@ -417,34 +418,69 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   width: 54px;
   height: 54px;
   border-radius: 999px;
-  background: var(--color-ticket-ink);
-  color: var(--color-lime);
+  background: var(--color-lime);
+  color: var(--color-ticket-ink);
   display: grid;
   place-items: center;
   font-family: var(--font-display);
+  font-weight: 650;
   font-size: 1.5rem;
   letter-spacing: 0.04em;
   transform: rotate(-6deg);
   box-shadow:
     0 0 0 4px var(--color-ticket),
     0 0 0 5.5px var(--color-ticket-ink),
-    0 8px 16px -8px rgba(0, 0, 0, 0.4);
+    0 8px 16px -10px rgba(38, 52, 92, 0.36);
+}
+
+/* ─── Boutons à enfoncement tactile ─── */
+.pressable {
+  --press-depth: 3px;
+  --press-shadow: rgba(38, 52, 92, 0.22);
+  position: relative;
+  z-index: 0;
+  transform: translate(0, 0);
+  box-shadow:
+    0 var(--press-depth) 0 var(--press-shadow),
+    0 10px 18px -16px var(--press-shadow);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    filter 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease;
+}
+
+.pressable::before {
+  display: none;
+}
+
+.pressable:active:not(:disabled) {
+  transform: translateY(calc(var(--press-depth) - 1px));
+  box-shadow:
+    0 1px 0 var(--press-shadow),
+    0 4px 10px -14px var(--press-shadow);
+  filter: none;
+}
+
+@media (hover: hover) {
+  .pressable:hover:not(:disabled) {
+    filter: brightness(0.98);
+  }
+}
+
+.pressable:disabled {
+  box-shadow: none;
 }
 
 /* ─── Striped bar (decorative band) ─── */
 .stripes {
-  background-image: repeating-linear-gradient(
-    -45deg,
-    var(--color-ticket-ink) 0 6px,
-    transparent 6px 12px
-  );
+  background: transparent;
 }
 .stripes-lime {
-  background-image: repeating-linear-gradient(
-    -45deg,
-    var(--color-lime) 0 6px,
-    transparent 6px 12px
-  );
+  background: transparent;
 }
 
 /* ─── Animations utilitaires ─── */
@@ -453,6 +489,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 
 /* ─── Motion entre tabs ─── */
 .page-motion-viewport {
+  --page-motion-gap: clamp(40px, 5vw, 72px);
   position: relative;
   overflow-x: clip;
 }
@@ -509,10 +546,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 
 /* ─── Bottom tab bar ─── */
 .tabbar-glow {
-  background:
-    radial-gradient(50% 80% at 28% 0%, rgba(115, 214, 169, 0.16), transparent),
-    radial-gradient(50% 80% at 72% 0%, rgba(154, 139, 242, 0.16), transparent),
-    var(--color-surface);
+  background: rgba(255, 250, 247, 0.94);
   backdrop-filter: blur(20px);
 }
 
