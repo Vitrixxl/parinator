@@ -377,7 +377,10 @@ function useCopy() {
 }
 
 type View = "bets" | "create" | "friends" | "debts";
+type ViewDirection = 1 | -1;
 type Side = "A" | "B";
+
+const VIEW_ORDER: View[] = ["bets", "create", "friends", "debts"];
 
 type User = {
   id: string;
@@ -503,7 +506,17 @@ export default function App() {
   });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
   const [user, setUser] = useState<User | null>(null);
-  const [view, setView] = useState<View>("bets");
+  const [viewTransition, setViewTransition] = useState<{
+    active: View;
+    previous: View | null;
+    direction: ViewDirection;
+    key: number;
+  }>({
+    active: "bets",
+    previous: null,
+    direction: 1,
+    key: 0
+  });
   const [friends, setFriends] = useState<FriendsResponse>(emptyFriends);
   const [bets, setBets] = useState<BetsResponse>(emptyBets);
   const [debts, setDebts] = useState<DebtsResponse>(emptyDebts);
@@ -512,6 +525,7 @@ export default function App() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const copy = translations[language];
   const copyRef = useRef(copy);
+  const view = viewTransition.active;
 
   useEffect(() => {
     copyRef.current = copy;
@@ -521,6 +535,34 @@ export default function App() {
     localStorage.setItem(LANGUAGE_KEY, nextLanguage);
     setLanguageState(nextLanguage);
   }, []);
+
+  const setView = useCallback((nextView: View) => {
+    setViewTransition((current) => {
+      if (nextView === current.active) return current;
+
+      const currentIndex = VIEW_ORDER.indexOf(current.active);
+      const nextIndex = VIEW_ORDER.indexOf(nextView);
+
+      return {
+        active: nextView,
+        previous: current.active,
+        direction: nextIndex > currentIndex ? 1 : -1,
+        key: current.key + 1
+      };
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!viewTransition.previous) return;
+
+    const timeout = window.setTimeout(() => {
+      setViewTransition((current) =>
+        current.key === viewTransition.key ? { ...current, previous: null } : current
+      );
+    }, 420);
+
+    return () => window.clearTimeout(timeout);
+  }, [viewTransition.key, viewTransition.previous]);
 
   const shareCode = useMemo(() => {
     const match = window.location.pathname.match(/^\/join\/([^/]+)/);
@@ -627,6 +669,68 @@ export default function App() {
     pushToast(`${copy.toast.connectedAs} ${response.user.username}.`);
   };
 
+  const renderView = (targetView: View) => {
+    if (!token || !user) return null;
+
+    switch (targetView) {
+      case "bets":
+        return (
+          <BetsView
+            bets={bets}
+            friends={friends.friends}
+            user={user}
+            token={token}
+            sharedBet={sharedBet}
+            onRefresh={refreshAll}
+            onError={handleError}
+            onToast={pushToast}
+            reloadShared={() => {
+              if (shareCode) {
+                apiRequest<Bet>(`/api/bets/share/${shareCode}`)
+                  .then(setSharedBet)
+                  .catch(handleError);
+              }
+            }}
+          />
+        );
+      case "create":
+        return (
+          <CreateBetView
+            friends={friends.friends}
+            token={token}
+            onCreated={(bet) => {
+              setBets((current) => ({ ...current, mine: [bet, ...current.mine] }));
+              setView("bets");
+              pushToast(copy.toast.betCreated);
+              refreshAll().catch(handleError);
+            }}
+            onError={handleError}
+          />
+        );
+      case "friends":
+        return (
+          <FriendsView
+            friends={friends}
+            token={token}
+            onRefresh={refreshAll}
+            onError={handleError}
+            onToast={pushToast}
+          />
+        );
+      case "debts":
+        return (
+          <DebtsView
+            debts={debts}
+            token={token}
+            onRefresh={refreshAll}
+            onError={handleError}
+          />
+        );
+    }
+  };
+
+  const hasViewTransition = viewTransition.previous !== null;
+
   return (
     <LanguageContext.Provider value={{ language, setLanguage, copy }}>
       <div className="world-bg" aria-hidden />
@@ -641,56 +745,33 @@ export default function App() {
         <div className="min-h-screen pb-[120px] sm:pb-10">
           <TopBar user={user} onLogout={logout} />
 
-          <main className="mx-auto max-w-[1080px] px-4 sm:px-8 py-6 sm:py-10">
-            {view === "bets" && (
-              <BetsView
-                bets={bets}
-                friends={friends.friends}
-                user={user}
-                token={token}
-                sharedBet={sharedBet}
-                onRefresh={refreshAll}
-                onError={handleError}
-                onToast={pushToast}
-                reloadShared={() => {
-                  if (shareCode) {
-                    apiRequest<Bet>(`/api/bets/share/${shareCode}`)
-                      .then(setSharedBet)
-                      .catch(handleError);
-                  }
-                }}
-              />
+          <main className="page-motion-viewport mx-auto max-w-[1080px] px-4 sm:px-8 py-6 sm:py-10">
+            {viewTransition.previous && (
+              <div
+                key={`previous-${viewTransition.previous}-${viewTransition.key}`}
+                aria-hidden="true"
+                className={cn(
+                  "page-motion-pane page-motion-pane-exit",
+                  viewTransition.direction > 0
+                    ? "page-motion-pane-exit-left"
+                    : "page-motion-pane-exit-right"
+                )}
+              >
+                {renderView(viewTransition.previous)}
+              </div>
             )}
-            {view === "create" && (
-              <CreateBetView
-                friends={friends.friends}
-                token={token}
-                onCreated={(bet) => {
-                  setBets((current) => ({ ...current, mine: [bet, ...current.mine] }));
-                  setView("bets");
-                  pushToast(copy.toast.betCreated);
-                  refreshAll().catch(handleError);
-                }}
-                onError={handleError}
-              />
-            )}
-            {view === "friends" && (
-              <FriendsView
-                friends={friends}
-                token={token}
-                onRefresh={refreshAll}
-                onError={handleError}
-                onToast={pushToast}
-              />
-            )}
-            {view === "debts" && (
-              <DebtsView
-                debts={debts}
-                token={token}
-                onRefresh={refreshAll}
-                onError={handleError}
-              />
-            )}
+            <div
+              key={`active-${view}-${viewTransition.key}`}
+              className={cn(
+                "page-motion-pane",
+                hasViewTransition &&
+                  (viewTransition.direction > 0
+                    ? "page-motion-pane-enter-right"
+                    : "page-motion-pane-enter-left")
+              )}
+            >
+              {renderView(view)}
+            </div>
           </main>
 
           <TabBar view={view} setView={setView} bets={bets} debts={debts} />

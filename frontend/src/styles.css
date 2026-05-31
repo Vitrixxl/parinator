@@ -105,6 +105,26 @@
   to   { transform: translateX(-50%); }
 }
 
+@keyframes page-slide-in-from-right {
+  from { opacity: 0.96; transform: translate3d(100%, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes page-slide-in-from-left {
+  from { opacity: 0.96; transform: translate3d(-100%, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes page-slide-out-to-left {
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to   { opacity: 0.96; transform: translate3d(-100%, 0, 0); }
+}
+
+@keyframes page-slide-out-to-right {
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to   { opacity: 0.96; transform: translate3d(100%, 0, 0); }
+}
+
 /* ─── Reset minimal ─── */
 * { box-sizing: border-box; }
 
@@ -430,6 +450,62 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 /* ─── Animations utilitaires ─── */
 .rise { animation: rise 480ms cubic-bezier(.2,.7,.3,1) backwards; }
 .pop  { animation: pop  380ms cubic-bezier(.2,.7,.3,1.4) backwards; }
+
+/* ─── Motion entre tabs ─── */
+.page-motion-viewport {
+  position: relative;
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  .page-motion-viewport { overflow-x: hidden; }
+}
+
+.page-motion-pane {
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+}
+
+.page-motion-pane-exit {
+  position: absolute;
+  inset: 1.5rem 1rem auto;
+  width: calc(100% - 2rem);
+  pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .page-motion-pane-exit {
+    inset: 2.5rem 2rem auto;
+    width: calc(100% - 4rem);
+  }
+}
+
+.page-motion-pane-enter-right {
+  animation: page-slide-in-from-right 360ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.page-motion-pane-enter-left {
+  animation: page-slide-in-from-left 360ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.page-motion-pane-exit-left {
+  animation: page-slide-out-to-left 360ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.page-motion-pane-exit-right {
+  animation: page-slide-out-to-right 360ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-motion-pane-enter-right,
+  .page-motion-pane-enter-left,
+  .page-motion-pane-exit-left,
+  .page-motion-pane-exit-right {
+    animation: none;
+  }
+
+  .page-motion-pane-exit { display: none; }
+}
 
 /* ─── Bottom tab bar ─── */
 .tabbar-glow {
