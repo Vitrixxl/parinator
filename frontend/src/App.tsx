@@ -756,7 +756,7 @@ function TopBar({ user, onLogout }: { user: User; onLogout: () => void }) {
       <div className="mx-auto max-w-[1080px] px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative w-9 h-9 rounded-md bg-lime grid place-items-center shrink-0 shadow-[0_2px_0_var(--color-lime-deep)]">
-            <Swords className="w-4 h-4 text-canvas" strokeWidth={2.5} />
+            <Swords className="w-4 h-4 text-[#0f2d1b]" strokeWidth={2.5} />
           </div>
           <div className="min-w-0">
             <div className="flex items-baseline gap-2">
@@ -768,14 +768,14 @@ function TopBar({ user, onLogout }: { user: User; onLogout: () => void }) {
               </span>
             </div>
             <p className="font-mono text-[10px] tracking-[0.18em] text-ink-dim uppercase truncate">
-              <span className="text-lime">●</span> {copy.common.online} · {user.username}
+              <span className="text-lime-deep">●</span> {copy.common.online} · {user.username}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <div className="hidden sm:flex items-center gap-3 pr-3 border-r border-edge/60">
-            <div className="w-9 h-9 rounded-full bg-lime/15 border border-lime/30 grid place-items-center font-display text-sm text-lime">
+            <div className="w-9 h-9 rounded-full bg-lime/15 border border-lime/30 grid place-items-center font-display text-sm text-lime-dark">
               {initials(user.username)}
             </div>
             <div className="text-right">
@@ -836,7 +836,7 @@ function TabBar({
       aria-label={copy.nav.aria}
       className="fixed sm:bottom-6 bottom-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.2rem)] sm:w-auto safe-bottom"
     >
-      <div className="tabbar-glow flex items-center gap-1 p-1.5 rounded-2xl border border-edge-strong shadow-[0_24px_48px_-12px_rgba(0,0,0,0.6)]">
+      <div className="tabbar-glow flex items-center gap-1 p-1.5 rounded-2xl border border-edge-strong shadow-[0_20px_44px_-16px_rgba(58,40,24,0.30)]">
         {tabs.map((tab) => {
           const active = view === tab.id;
           const count = counts[tab.id];
@@ -845,7 +845,7 @@ function TabBar({
               key={tab.id}
               type="button"
               onClick={() => setView(tab.id)}
-              style={active ? { color: "#1f2a1f", backgroundColor: "#9be0a8" } : undefined}
+              style={active ? { color: "#0f2d1b", backgroundColor: "#5cbf83" } : undefined}
               className={cn(
                 "relative flex-1 sm:flex-none sm:min-w-[100px] h-12 px-3 sm:px-5 rounded-xl flex items-center justify-center gap-2 font-display uppercase tracking-[0.06em] text-xs transition-all",
                 active
@@ -859,7 +859,7 @@ function TabBar({
                 <span
                   style={
                     active
-                      ? { color: "#1f2a1f", backgroundColor: "rgba(31,42,31,0.16)" }
+                      ? { color: "#0f2d1b", backgroundColor: "rgba(15,45,27,0.15)" }
                       : undefined
                   }
                   className={cn(
@@ -897,7 +897,7 @@ function ToastStack({ toasts }: { toasts: Toast[] }) {
           className="ticket ticket-dark p-3 pl-4 flex items-center gap-3 pop"
         >
           <span className="w-8 h-8 rounded-full bg-lime/15 border border-lime/40 grid place-items-center shrink-0">
-            <Bell className="w-3.5 h-3.5 text-lime" />
+            <Bell className="w-3.5 h-3.5 text-lime-dark" />
           </span>
           <p className="text-sm leading-snug">{toast.message}</p>
         </div>
@@ -1020,7 +1020,7 @@ function AuthScreen({
       <section className="hidden lg:flex relative flex-col justify-between p-12 overflow-hidden">
         <div className="flex items-center gap-3 rise" style={{ animationDelay: "60ms" }}>
           <div className="w-10 h-10 rounded-md bg-lime grid place-items-center shadow-[0_2px_0_var(--color-lime-deep)]">
-            <Swords className="w-5 h-5 text-black" strokeWidth={2.5} />
+            <Swords className="w-5 h-5 text-[#0f2d1b]" strokeWidth={2.5} />
           </div>
           <div>
             <p className="font-display text-2xl uppercase tracking-tight leading-none">Parinator</p>
@@ -1032,7 +1032,7 @@ function AuthScreen({
           <p className="eyebrow mb-4">{copy.auth.manifest}</p>
           <h2 className="font-display uppercase tracking-tight leading-[0.92] text-[clamp(2.6rem,7vw,5.5rem)]">
             {copy.auth.heroLine1}<br />
-            <span className="text-lime">{copy.auth.heroLine2}</span>
+            <span className="text-lime-dark">{copy.auth.heroLine2}</span>
           </h2>
           <p className="mt-6 text-ink-dim text-lg max-w-md leading-relaxed">
             {copy.auth.heroDescription}
@@ -1052,7 +1052,7 @@ function AuthScreen({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-md bg-lime grid place-items-center shadow-[0_2px_0_var(--color-lime-deep)]">
-              <Swords className="w-4 h-4 text-black" strokeWidth={2.5} />
+              <Swords className="w-4 h-4 text-[#0f2d1b]" strokeWidth={2.5} />
             </div>
             <p className="font-display text-xl uppercase tracking-tight leading-none">Parinator</p>
           </div>
@@ -1074,15 +1074,15 @@ function AuthScreen({
             <p className="eyebrow mb-2">{copy.auth.manifest}</p>
             <h1 className="font-display uppercase tracking-tight leading-[0.95] text-4xl">
               {copy.auth.heroLine1}<br />
-              <span className="text-lime">{copy.auth.heroLine2Mobile}</span>
+              <span className="text-lime-dark">{copy.auth.heroLine2Mobile}</span>
             </h1>
           </div>
 
           {sharedBet && (
             <div className="mb-4 flex items-center gap-3 p-3 rounded-lg border border-lime/30 bg-lime/[0.06]">
-              <Sparkles className="w-4 h-4 text-lime shrink-0" />
+              <Sparkles className="w-4 h-4 text-lime-dark shrink-0" />
               <div className="min-w-0">
-                <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-lime">
+                <p className="font-mono text-[10px] tracking-[0.18em] uppercase text-lime-dark">
                   {copy.common.ticket} {ticketNumber(sharedBet.shareCode)}
                 </p>
                 <p className="font-display text-sm uppercase tracking-tight truncate">
@@ -1149,7 +1149,7 @@ function FeatureRow() {
         <span key={item.label} className="flex items-center">
           {i > 0 && <span className="w-px h-4 bg-edge mx-1" />}
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-ink-dim font-mono text-[10px] tracking-[0.16em] uppercase">
-            <span className="text-lime">{item.icon}</span>
+            <span className="text-lime-dark">{item.icon}</span>
             {item.label}
           </span>
         </span>
@@ -1691,14 +1691,14 @@ function ParticipantChip({
   if (participant.status === "declined")
     chipClass = "border-rose/40 bg-rose/10 text-rose line-through";
   if (isWinner)
-    chipClass = "border-lime-deep bg-lime text-canvas font-bold";
+    chipClass = "border-lime-deep bg-lime text-[#0f2d1b] font-bold";
 
   return (
     <span className={cn("chip", chipClass)}>
       <span
         className={cn(
           "chip-avatar",
-          isWinner ? "bg-canvas/15 text-canvas" : "bg-ticket-ink/10 text-ticket-ink"
+          isWinner ? "bg-[#0f2d1b]/15 text-[#0f2d1b]" : "bg-ticket-ink/10 text-ticket-ink"
         )}
       >
         {initials(participant.username)}
@@ -1786,7 +1786,7 @@ function SideBox({
             align === "left" ? "right-12 sm:right-14" : "right-2"
           )}
         >
-          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-canvas text-lime font-mono text-[9px] tracking-[0.2em] uppercase">
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-ticket-ink text-lime font-mono text-[9px] tracking-[0.2em] uppercase">
             <Crown className="w-2.5 h-2.5" /> {copy.common.win}
           </span>
         </div>
@@ -2023,7 +2023,7 @@ function CreateBetView({
                     onClick={() => toggleInvite(friend.id)}
                     style={
                       checked
-                        ? { backgroundColor: "#9be0a8", color: "#1f2a1f" }
+                        ? { backgroundColor: "#5cbf83", color: "#0f2d1b" }
                         : undefined
                     }
                     className={cn(
@@ -2036,7 +2036,7 @@ function CreateBetView({
                     <span
                       className={cn(
                         "w-7 h-7 rounded-full grid place-items-center font-display text-xs shrink-0",
-                        checked ? "bg-black/15 text-black" : "bg-surface-strong text-ink-dim"
+                        checked ? "bg-[#0f2d1b]/15 text-[#0f2d1b]" : "bg-surface-strong text-ink-dim"
                       )}
                     >
                       {initials(friend.username)}
@@ -2154,7 +2154,7 @@ function FriendsView({
               style={{ animationDelay: `${i * 60}ms` } as React.CSSProperties}
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-lime/15 border border-lime/30 grid place-items-center font-display text-sm text-lime shrink-0">
+                <div className="w-10 h-10 rounded-full bg-lime/15 border border-lime/30 grid place-items-center font-display text-sm text-lime-dark shrink-0">
                   {initials(request.user.username)}
                 </div>
                 <div className="min-w-0">
@@ -2226,7 +2226,7 @@ function FriendsView({
             >
               <div className="relative mx-auto w-14 h-14">
                 <div className="absolute inset-0 rounded-full bg-lime/20 blur-md" />
-                <div className="relative w-14 h-14 rounded-full bg-lime grid place-items-center font-display text-xl text-canvas">
+                <div className="relative w-14 h-14 rounded-full bg-lime grid place-items-center font-display text-xl text-[#0f2d1b]">
                   {initials(friend.username)}
                 </div>
               </div>
@@ -2357,9 +2357,9 @@ function ScoreCard({
   const copy = useCopy();
   const colorClass =
     color === "ember"
-      ? "text-ember"
+      ? "text-ember-deep"
       : color === "lime"
-        ? "text-lime"
+        ? "text-lime-dark"
         : color === "jade"
           ? "text-jade"
           : "text-rose";
@@ -2395,7 +2395,7 @@ function DebtCard({
 }) {
   const copy = useCopy();
   const settled = debt.status === "settled";
-  const accentColor = mode === "owe" ? "text-ember" : "text-lime";
+  const accentColor = mode === "owe" ? "text-ember-deep" : "text-lime-dark";
 
   return (
     <Card

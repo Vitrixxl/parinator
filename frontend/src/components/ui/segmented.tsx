@@ -46,8 +46,8 @@ export function Segmented<T extends string>({
             style={
               active
                 ? ink
-                  ? { color: "#ffffff", backgroundColor: "#33291f" }
-                  : { color: "#1f2a1f", backgroundColor: "#9be0a8" }
+                  ? { color: "#ffffff", backgroundColor: "#3a2e23" }
+                  : { color: "#0f2d1b", backgroundColor: "#5cbf83" }
                 : undefined
             }
             className={cn(

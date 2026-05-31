@@ -45,9 +45,9 @@ export interface ButtonProps
 }
 
 const variantInlineStyle: Partial<Record<NonNullable<ButtonProps["variant"]>, React.CSSProperties>> = {
-  primary: { color: "#1f2a1f", backgroundColor: "#9be0a8" },
-  ember: { color: "#3a1c12", backgroundColor: "#ff8e72" },
-  ink: { color: "#ffffff", backgroundColor: "#33291f" }
+  primary: { color: "#0f2d1b", backgroundColor: "#5cbf83" },
+  ember: { color: "#3a1c12", backgroundColor: "#f2724c" },
+  ink: { color: "#ffffff", backgroundColor: "#3a2e23" }
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

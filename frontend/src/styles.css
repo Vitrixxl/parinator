@@ -4,64 +4,64 @@
 /* ───────────────────────────────────────────────
    PARINATOR
    Identité : soirée entre potes, chaleureuse & douce
-   Palette  : crépuscule cacao · menthe tendre · corail
+   Palette  : crème claire · menthe amicale · corail tiède
    Polices  : Anton (display) · Instrument Sans · JetBrains Mono
    ─────────────────────────────────────────────── */
 
 @theme {
-  /* Base canvas — un crépuscule cacao, tiède et cosy */
-  --color-canvas: #24201c;
-  --color-canvas-soft: #2c2723;
-  --color-ink: #f7efe1;
-  --color-ink-dim: #b0a48f;
-  --color-ink-faint: #675d4e;
+  /* Base — crème claire, tiède et lumineuse */
+  --color-canvas: #f7f0e6;
+  --color-canvas-soft: #efe5d6;
+  --color-ink: #3a2e23;
+  --color-ink-dim: #8a7a66;
+  --color-ink-faint: #bcae9a;
 
-  /* Surfaces — bois chaud */
-  --color-surface: #2f2925;
-  --color-surface-strong: #3a322c;
-  --color-surface-deep: #1d1916;
+  /* Surfaces — blanc crème */
+  --color-surface: #fffdf9;
+  --color-surface-strong: #f3eadb;
+  --color-surface-deep: #ffffff;
 
-  /* Papier ticket — crème douce */
-  --color-ticket: #f9f1e3;
-  --color-ticket-warm: #f1e7d4;
-  --color-ticket-ink: #33291f;
-  --color-ticket-ink-dim: #7a7060;
-  --color-ticket-edge: #e4d7be;
+  /* Papier ticket — blanc pur, doux */
+  --color-ticket: #ffffff;
+  --color-ticket-warm: #fbf4e8;
+  --color-ticket-ink: #3a2e23;
+  --color-ticket-ink-dim: #8a7a66;
+  --color-ticket-edge: #ece1d0;
 
-  /* Accents — adoucis, amicaux */
-  --color-lime: #9be0a8;
-  --color-lime-deep: #6cc185;
-  --color-lime-dark: #4f9a64;
-  --color-ember: #ff8e72;
-  --color-ember-deep: #ed6a4a;
-  --color-rose: #ff8aa0;
-  --color-jade: #84d6be;
-  --color-amber: #ffcf85;
+  /* Accents — chaleureux & amicaux */
+  --color-lime: #5cbf83;
+  --color-lime-deep: #3fa566;
+  --color-lime-dark: #2a7a4a;
+  --color-ember: #f2724c;
+  --color-ember-deep: #dc5630;
+  --color-rose: #e85d7e;
+  --color-jade: #1ba98b;
+  --color-amber: #c2820f;
 
   /* Borders */
-  --color-edge: #433a33;
-  --color-edge-strong: #564a41;
+  --color-edge: #ece1d0;
+  --color-edge-strong: #dac9b1;
 
   /* shadcn semantic — pour les composants ui/* */
-  --color-background: #24201c;
-  --color-foreground: #f7efe1;
-  --color-card: #2f2925;
-  --color-card-foreground: #f7efe1;
-  --color-popover: #3a322c;
-  --color-popover-foreground: #f7efe1;
-  --color-primary: #9be0a8;
-  --color-primary-foreground: #1f2a1f;
-  --color-secondary: #3a322c;
-  --color-secondary-foreground: #f7efe1;
-  --color-muted: #3a322c;
-  --color-muted-foreground: #b0a48f;
-  --color-accent: #ff8e72;
+  --color-background: #f7f0e6;
+  --color-foreground: #3a2e23;
+  --color-card: #fffdf9;
+  --color-card-foreground: #3a2e23;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #3a2e23;
+  --color-primary: #5cbf83;
+  --color-primary-foreground: #0f2d1b;
+  --color-secondary: #f3eadb;
+  --color-secondary-foreground: #3a2e23;
+  --color-muted: #f3eadb;
+  --color-muted-foreground: #8a7a66;
+  --color-accent: #f2724c;
   --color-accent-foreground: #3a1c12;
-  --color-destructive: #ff8aa0;
-  --color-destructive-foreground: #24201c;
-  --color-border: #433a33;
-  --color-input: #433a33;
-  --color-ring: #9be0a8;
+  --color-destructive: #e85d7e;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #ece1d0;
+  --color-input: #ece1d0;
+  --color-ring: #5cbf83;
 
   /* Polices */
   --font-display: "Anton", "Bebas Neue", system-ui, sans-serif;
@@ -125,7 +125,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 
 ::selection {
   background: var(--color-lime);
-  color: var(--color-canvas);
+  color: var(--color-ticket-ink);
 }
 
 /* ─── Atmosphère globale ─── */
@@ -134,9 +134,9 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(65vw 55vh at 12% -10%, rgba(155, 224, 168, 0.10), transparent 62%),
-    radial-gradient(55vw 55vh at 100% 110%, rgba(255, 142, 114, 0.09), transparent 62%),
-    radial-gradient(70vw 60vh at 50% 50%, rgba(255, 207, 133, 0.035), transparent 70%),
+    radial-gradient(65vw 55vh at 12% -10%, rgba(92, 191, 131, 0.14), transparent 62%),
+    radial-gradient(55vw 55vh at 100% 110%, rgba(242, 114, 76, 0.10), transparent 62%),
+    radial-gradient(70vw 60vh at 50% 50%, rgba(194, 130, 15, 0.05), transparent 70%),
     linear-gradient(180deg, var(--color-canvas) 0%, var(--color-canvas-soft) 100%);
 }
 
@@ -145,9 +145,9 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.26;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.45 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.23  0 0 0 0 0.18  0 0 0 0 0.14  0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
 .world-wordmark {
@@ -160,7 +160,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   font-family: var(--font-display);
   font-size: clamp(18rem, 32vw, 42rem);
   letter-spacing: -0.03em;
-  color: rgba(242, 234, 216, 0.018);
+  color: rgba(58, 46, 35, 0.028);
   white-space: nowrap;
   user-select: none;
 }
@@ -199,9 +199,9 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   border-radius: 20px;
   border: 1px solid var(--color-ticket-edge);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 20px 44px -22px rgba(58, 40, 24, 0.45),
-    0 2px 0 rgba(58, 40, 24, 0.16);
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 18px 40px -24px rgba(58, 40, 24, 0.22),
+    0 2px 0 rgba(58, 40, 24, 0.05);
   overflow: visible;
 }
 
@@ -213,7 +213,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   border-radius: inherit;
   pointer-events: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.078  0 0 0 0 0.075  0 0 0 0 0.05  0 0 0 0.4 0'/></filter><rect width='100%' height='100%' filter='url(%23p)'/></svg>");
-  opacity: 0.35;
+  opacity: 0.22;
   mix-blend-mode: multiply;
 }
 
@@ -224,9 +224,9 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   color: var(--color-ink);
   border-color: var(--color-edge);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    0 20px 44px -22px rgba(0, 0, 0, 0.55),
-    0 2px 0 rgba(0, 0, 0, 0.3);
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 18px 40px -24px rgba(58, 40, 24, 0.20),
+    0 2px 0 rgba(58, 40, 24, 0.04);
 }
 .ticket-dark::after { display: none; }
 
@@ -245,12 +245,12 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
   background-repeat: repeat-x;
 }
 
-/* Variante perforation sur fond sombre (cartes ticket-dark) */
+/* Variante perforation sur cartes ticket-dark (surface claire) */
 .perforation-dark {
   background-image: linear-gradient(
     to right,
-    rgba(242, 234, 216, 0.22) 0,
-    rgba(242, 234, 216, 0.22) 6px,
+    rgba(58, 46, 35, 0.26) 0,
+    rgba(58, 46, 35, 0.26) 6px,
     transparent 6px,
     transparent 12px
   );
@@ -427,7 +427,7 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 /* ─── Bottom tab bar ─── */
 .tabbar-glow {
   background:
-    radial-gradient(60% 80% at 50% 0%, rgba(155, 224, 168, 0.08), transparent),
+    radial-gradient(60% 80% at 50% 0%, rgba(92, 191, 131, 0.12), transparent),
     var(--color-surface);
   backdrop-filter: blur(20px);
 }
