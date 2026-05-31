@@ -1016,7 +1016,7 @@ function TabBar({
       aria-label={copy.nav.aria}
       className="fixed sm:bottom-6 bottom-3 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] sm:w-auto safe-bottom"
     >
-      <div className="flex w-full sm:w-auto items-center gap-3">
+      <div className="flex w-full sm:w-auto items-center gap-3 rounded-2xl border border-edge bg-white/90 p-3 shadow-[0_18px_36px_-24px_rgba(38,52,92,0.42)] backdrop-blur-xl">
         {tabs.map((tab) => {
           const active = view === tab.id;
           const palette = TAB_PALETTE[tab.id];
